@@ -1,0 +1,7 @@
+---
+applications:
+  - name: integration-dispatcherqconsumer-service
+    buildpack: java_buildpack
+    path: target/dispatcher-q-1.0.0-SNAPSHOT.jar
+    services:
+        - fieldChangedEventQInst
