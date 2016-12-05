@@ -1,0 +1,509 @@
+{
+  "id": "sid-33430087-7a44-4be3-8517-914faf923288",
+  "name": "PlantHealthOrchestration",
+  "bpmnXml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <definitions xmlns=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" expressionLanguage=\"http://www.w3.org/1999/XPath\" id=\"sid-81430087-7a44-4be3-8517-914faf923256\" targetNamespace=\"DSP-PM\" typeLanguage=\"http://www.w3.org/2001/XMLSchema\" xsi:schemaLocation=\"http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd\" xmlns:activiti=\"http://activiti.org/bpmn\"> <process id=\"DemoAdderWorklow\" isExecutable=\"true\"> <startEvent id=\"sid-start\" name=\"\"> <outgoing>sid-flow1</outgoing> </startEvent> <serviceTask completionQuantity=\"1\" id=\"sid-10001\" isForCompensation=\"false\" name=\"url::http://integration_rmd_analytics.grc-apps.ge.com/api/v1/ref_app_analytic/execution\" startQuantity=\"1\" activiti:delegateExpression=\"${javaDelegate}\" xmlns:activiti=\"http://activiti.org/bpmn\"> <incoming>sid-flow1</incoming> <outgoing>sid-flow2</outgoing> </serviceTask> <serviceTask completionQuantity=\"1\" id=\"sid-10002\" isForCompensation=\"false\" name=\"url::http://integration-ref-app-analytic-cf.grc-apps.ge.com/api/v1/ref_app_analytic/execution\" startQuantity=\"1\" activiti:delegateExpression=\"${javaDelegate}\" xmlns:activiti=\"http://activiti.org/bpmn\"> <incoming>sid-flow2</incoming> <outgoing>sid-flow3</outgoing> </serviceTask> <endEvent id=\"sid-end\" name=\"\"> <incoming>sid-flow3</incoming> </endEvent> <sequenceFlow id=\"sid-flow1\" name=\"\" sourceRef=\"sid-start\" targetRef=\"sid-10001\"/> <sequenceFlow id=\"sid-flow2\" name=\"\" sourceRef=\"sid-10001\" targetRef=\"sid-10002\"/> <sequenceFlow id=\"sid-flow3\" name=\"\" sourceRef=\"sid-10002\" targetRef=\"sid-end\"/> </process> </definitions>",
+  "analyticInputData": [
+    {
+      "analyticStepId": "sid-10001",
+      "data": "{ \"solutionIdentifier\": { \"@type\": \"SolutionIdentifier\", \"id\": 1001 },
+
+ \"inputPort\": [ { \"portIdentifier\": { \"@type\": \"PortIdentifier\", \"id\": \"ALARM_HI\", \"name\": \"ALARM_HI\" },
+
+ \"fieldSelection\": { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetTag/crank-frame-dischargepressure/outputMaximum\", \"name\": \"/asset/assetTag/crank-frame-dischargepressure/outputMaximum\", \"source\": \"PREDIX_ASSET\" },
+
+ \"expectedDataType\": \"DMReal\", \"resultId\": \"ALARM_HI\" },
+
+ \"selectionFilter\": { \"@type\": \"FieldSelectionFilter\", \"fieldIdentifierValue\": [ { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetId\", \"source\": \"PREDIX_ASSET\" },
+
+ \"value\": \"/asset/compressor-2015\" } ] } },
+
+ { \"portIdentifier\": { \"@type\": \"PortIdentifier\", \"id\": \"ALARM_LO\", \"name\": \"ALARM_LO\" },
+
+ \"fieldSelection\": { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetTag/crank-frame-dischargepressure/outputMinimum\", \"name\": \"/asset/assetTag/crank-frame-dischargepressure/outputMinimum\", \"source\": \"PREDIX_ASSET\" },
+
+ \"expectedDataType\": \"DMReal\", \"resultId\": \"ALARM_LO\" },
+
+ \"selectionFilter\": { \"@type\": \"FieldSelectionFilter\", \"fieldIdentifierValue\": [ { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetId\", \"source\": \"PREDIX_ASSET\" },
+
+ \"value\": \"/asset/compressor-2015\" } ] } },
+
+ { \"portIdentifier\": { \"@type\": \"PortIdentifier\", \"id\": \"TS_DATA\", \"name\": \"TS_DATA\" },
+
+ \"fieldSelection\": { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetTag/crank-frame-dischargepressure\", \"name\": \"/asset/assetTag/crank-frame-dischargepressure\", \"source\": \"PREDIX_TIMESERIES\" },
+
+ \"expectedDataType\": \"DMDataSeq\", \"resultId\": \"TS_DATA\" },
+
+ \"selectionFilter\": { \"@type\": \"FieldSelectionFilter\", \"fieldIdentifierValue\": [ { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetId\", \"source\": \"PREDIX_TIMESERIES\" },
+
+ \"value\": \"/asset/compressor-2015\" },
+
+ { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"startTime\" },
+
+ \"value\": \"2015-08-01 11:00:00\" },
+
+ { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"endTime\" },
+
+ \"value\": \"2015-08-08 23:00:00\" } ] } } ],
+
+ \"outputPort\": [ { \"portIdentifier\": { \"@type\": \"PortIdentifier\", \"id\": \"ALARM_STATUS\", \"name\": \"ALARM_STATUS\" },
+
+ \"fieldSelection\": { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertStatus/value\", \"name\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertStatus/value\", \"source\": \"PREDIX_ASSET\" },
+
+ \"resultId\": \"ALARM_STATUS\" },
+
+ \"selectionFilter\": { \"@type\": \"FieldSelectionFilter\", \"fieldIdentifierValue\": [ { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetId\", \"source\": \"PREDIX_ASSET\" },
+
+ \"value\": \"/asset/compressor-2015\" } ] } },
+
+ { \"portIdentifier\": { \"@type\": \"PortIdentifier\", \"id\": \"ALARM_LEVEL\", \"name\": \"ALARM_LEVEL\" },
+
+ \"fieldSelection\": { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertLevel/value\", \"name\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertLevel/value\", \"source\": \"PREDIX_ASSET\" },
+
+ \"resultId\": \"ALARM_LEVEL\" },
+
+ \"selectionFilter\": { \"@type\": \"FieldSelectionFilter\", \"fieldIdentifierValue\": [ { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetId\", \"source\": \"PREDIX_ASSET\" },
+
+ \"value\": \"/asset/compressor-2015\" } ] } },
+
+ { \"portIdentifier\": { \"@type\": \"PortIdentifier\", \"id\": \"ALARM_LEVEL_VALUE\", \"name\": \"ALARM_LEVEL_VALUE\" },
+
+ \"fieldSelection\": { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertLevelValue/value\", \"name\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertLevelValue/value\", \"source\": \"PREDIX_ASSET\" },
+
+ \"resultId\": \"ALARM_LEVEL_VALUE\" },
+
+ \"selectionFilter\": { \"@type\": \"FieldSelectionFilter\", \"fieldIdentifierValue\": [ { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetId\", \"source\": \"PREDIX_ASSET\" },
+
+ \"value\": \"/asset/compressor-2015\" } ] } },
+
+ { \"portIdentifier\": { \"@type\": \"PortIdentifier\", \"id\": \"ALARM_LEVEL_VALUE_TIME\", \"name\": \"ALARM_LEVEL_VALUE_TIME\" },
+
+ \"fieldSelection\": { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertTime/value\", \"name\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertTime/value\", \"source\": \"PREDIX_ASSET\" },
+
+ \"resultId\": \"ALARM_LEVEL_VALUE_TIME\" },
+
+ \"selectionFilter\": { \"@type\": \"FieldSelectionFilter\", \"fieldIdentifierValue\": [ { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetId\", \"source\": \"PREDIX_ASSET\" },
+
+ \"value\": \"/asset/compressor-2015\" } ] } },
+
+ { \"portIdentifier\": { \"@type\": \"PortIdentifier\", \"id\": \"ALARM_THRESHOLDDIFF\", \"name\": \"ALARM_THRESHOLDDIFF\" },
+
+ \"fieldSelection\": { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/deltaThreshold/value\", \"name\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/deltaThreshold/value\", \"source\": \"PREDIX_ASSET\" },
+
+ \"resultId\": \"ALARM_THRESHOLDDIFF\" },
+
+ \"selectionFilter\": { \"@type\": \"FieldSelectionFilter\", \"fieldIdentifierValue\": [ { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetId\", \"source\": \"PREDIX_ASSET\" },
+
+ \"value\": \"/asset/compressor-2015\" } ] } },
+
+ { \"portIdentifier\": { \"@type\": \"PortIdentifier\", \"id\": \"ALARM_THRESHOLDLEVEL\", \"name\": \"ALARM_THRESHOLDLEVEL\" },
+
+ \"fieldSelection\": { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/deltaThresholdLevel/value\", \"name\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/deltaThresholdLevel/value\", \"source\": \"PREDIX_ASSET\" },
+
+ \"resultId\": \"ALARM_THRESHOLDLEVEL\" },
+
+ \"selectionFilter\": { \"@type\": \"FieldSelectionFilter\", \"fieldIdentifierValue\": [ { \"fieldIdentifier\": { \"@type\": \"FieldIdentifier\", \"id\": \"/asset/assetId\", \"source\": \"PREDIX_ASSET\" },
+
+ \"value\": \"/asset/compressor-2015\" } ] } } ] }"
+    },
+    {
+      "analyticStepId": "sid-10002",
+      "data": "{
+	\"solutionIdentifier\": 
+	{
+		\"@type\": \"SolutionIdentifier\",
+		\"id\": 1001
+	},
+
+	\"inputPort\": 
+	[
+		{
+			\"portIdentifier\": 
+			{
+				\"@type\": \"PortIdentifier\",
+				\"id\": \"ALARM_HI\",
+				\"name\": \"ALARM_HI\"
+			},
+
+			\"fieldSelection\": 
+			{
+				\"fieldIdentifier\": 
+				{
+					\"@type\": \"FieldIdentifier\",
+					\"id\": \"/asset/assetTag/crank-frame-dischargepressure/outputMaximum\",
+					\"name\": \"/asset/assetTag/crank-frame-dischargepressure/outputMaximum\",
+					\"source\": \"PREDIX_ASSET\"
+				},
+
+				\"expectedDataType\": \"DMReal\",
+				\"resultId\": \"ALARM_HI\"
+			},
+
+			\"selectionFilter\": 
+			{
+				\"@type\": \"FieldSelectionFilter\",
+				\"fieldIdentifierValue\": 
+				[
+					{
+						\"fieldIdentifier\": 
+						{
+							\"@type\": \"FieldIdentifier\",
+							\"id\": \"/asset/assetId\",
+							\"source\": \"PREDIX_ASSET\"
+						},
+
+						\"value\": \"/asset/compressor-2015\"
+					}
+				]
+			}
+		},
+
+		{
+			\"portIdentifier\": 
+			{
+				\"@type\": \"PortIdentifier\",
+				\"id\": \"ALARM_LO\",
+				\"name\": \"ALARM_LO\"
+			},
+
+			\"fieldSelection\": 
+			{
+				\"fieldIdentifier\": 
+				{
+					\"@type\": \"FieldIdentifier\",
+					\"id\": \"/asset/assetTag/crank-frame-dischargepressure/outputMinimum\",
+					\"name\": \"/asset/assetTag/crank-frame-dischargepressure/outputMinimum\",
+					\"source\": \"PREDIX_ASSET\"
+				},
+
+				\"expectedDataType\": \"DMReal\",
+				\"resultId\": \"ALARM_LO\"
+			},
+
+			\"selectionFilter\": 
+			{
+				\"@type\": \"FieldSelectionFilter\",
+				\"fieldIdentifierValue\": 
+				[
+					{
+						\"fieldIdentifier\": 
+						{
+							\"@type\": \"FieldIdentifier\",
+							\"id\": \"/asset/assetId\",
+							\"source\": \"PREDIX_ASSET\"
+						},
+
+						\"value\": \"/asset/compressor-2015\"
+					}
+				]
+			}
+		},
+
+		{
+			\"portIdentifier\": 
+			{
+				\"@type\": \"PortIdentifier\",
+				\"id\": \"TS_DATA\",
+				\"name\": \"TS_DATA\"
+			},
+
+			\"fieldSelection\": 
+			{
+				\"fieldIdentifier\": 
+				{
+					\"@type\": \"FieldIdentifier\",
+					\"id\": \"/asset/assetTag/crank-frame-dischargepressure\",
+					\"name\": \"/asset/assetTag/crank-frame-dischargepressure\",
+					\"source\": \"PREDIX_TIMESERIES\"
+				},
+
+				\"expectedDataType\": \"DMDataSeq\",
+				\"resultId\": \"TS_DATA\"
+			},
+
+			\"selectionFilter\": 
+			{
+				\"@type\": \"FieldSelectionFilter\",
+				\"fieldIdentifierValue\": 
+				[
+					{
+						\"fieldIdentifier\": 
+						{
+							\"@type\": \"FieldIdentifier\",
+							\"id\": \"/asset/assetId\",
+							\"source\": \"PREDIX_TIMESERIES\"
+						},
+
+						\"value\": \"/asset/compressor-2015\"
+					},
+
+					{
+						\"fieldIdentifier\": 
+						{
+							\"@type\": \"FieldIdentifier\",
+							\"id\": \"startTime\"
+						},
+
+						\"value\": \"2015-08-01 11:00:00\"
+					},
+
+					{
+						\"fieldIdentifier\": 
+						{
+							\"@type\": \"FieldIdentifier\",
+							\"id\": \"endTime\"
+						},
+
+						\"value\": \"2015-08-08 23:00:00\"
+					}
+				]
+			}
+		}
+	],
+
+	\"outputPort\": 
+	[
+		{
+			\"portIdentifier\": 
+			{
+				\"@type\": \"PortIdentifier\",
+				\"id\": \"ALARM_STATUS\",
+				\"name\": \"ALARM_STATUS\"
+			},
+
+			\"fieldSelection\": 
+			{
+				\"fieldIdentifier\": 
+				{
+					\"@type\": \"FieldIdentifier\",
+					\"id\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertStatus/value\",
+					\"name\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertStatus/value\",
+					\"source\": \"PREDIX_ASSET\"
+				},
+
+				\"resultId\": \"ALARM_STATUS\"
+			},
+
+			\"selectionFilter\": 
+			{
+				\"@type\": \"FieldSelectionFilter\",
+				\"fieldIdentifierValue\": 
+				[
+					{
+						\"fieldIdentifier\": 
+						{
+							\"@type\": \"FieldIdentifier\",
+							\"id\": \"/asset/assetId\",
+							\"source\": \"PREDIX_ASSET\"
+						},
+
+						\"value\": \"/asset/compressor-2015\"
+					}
+				]
+			}
+		},
+
+		{
+			\"portIdentifier\": 
+			{
+				\"@type\": \"PortIdentifier\",
+				\"id\": \"ALARM_LEVEL\",
+				\"name\": \"ALARM_LEVEL\"
+			},
+
+			\"fieldSelection\": 
+			{
+				\"fieldIdentifier\": 
+				{
+					\"@type\": \"FieldIdentifier\",
+					\"id\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertLevel/value\",
+					\"name\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertLevel/value\",
+					\"source\": \"PREDIX_ASSET\"
+				},
+
+				\"resultId\": \"ALARM_LEVEL\"
+			},
+
+			\"selectionFilter\": 
+			{
+				\"@type\": \"FieldSelectionFilter\",
+				\"fieldIdentifierValue\": 
+				[
+					{
+						\"fieldIdentifier\": 
+						{
+							\"@type\": \"FieldIdentifier\",
+							\"id\": \"/asset/assetId\",
+							\"source\": \"PREDIX_ASSET\"
+						},
+
+						\"value\": \"/asset/compressor-2015\"
+					}
+				]
+			}
+		},
+
+		{
+			\"portIdentifier\": 
+			{
+				\"@type\": \"PortIdentifier\",
+				\"id\": \"ALARM_LEVEL_VALUE\",
+				\"name\": \"ALARM_LEVEL_VALUE\"
+			},
+
+			\"fieldSelection\": 
+			{
+				\"fieldIdentifier\": 
+				{
+					\"@type\": \"FieldIdentifier\",
+					\"id\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertLevelValue/value\",
+					\"name\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertLevelValue/value\",
+					\"source\": \"PREDIX_ASSET\"
+				},
+
+				\"resultId\": \"ALARM_LEVEL_VALUE\"
+			},
+
+			\"selectionFilter\": 
+			{
+				\"@type\": \"FieldSelectionFilter\",
+				\"fieldIdentifierValue\": 
+				[
+					{
+						\"fieldIdentifier\": 
+						{
+							\"@type\": \"FieldIdentifier\",
+							\"id\": \"/asset/assetId\",
+							\"source\": \"PREDIX_ASSET\"
+						},
+
+						\"value\": \"/asset/compressor-2015\"
+					}
+				]
+			}
+		},
+
+		{
+			\"portIdentifier\": 
+			{
+				\"@type\": \"PortIdentifier\",
+				\"id\": \"ALARM_LEVEL_VALUE_TIME\",
+				\"name\": \"ALARM_LEVEL_VALUE_TIME\"
+			},
+
+			\"fieldSelection\": 
+			{
+				\"fieldIdentifier\": 
+				{
+					\"@type\": \"FieldIdentifier\",
+					\"id\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertTime/value\",
+					\"name\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertTime/value\",
+					\"source\": \"PREDIX_ASSET\"
+				},
+
+				\"resultId\": \"ALARM_LEVEL_VALUE_TIME\"
+			},
+
+			\"selectionFilter\": 
+			{
+				\"@type\": \"FieldSelectionFilter\",
+				\"fieldIdentifierValue\": 
+				[
+					{
+						\"fieldIdentifier\": 
+						{
+							\"@type\": \"FieldIdentifier\",
+							\"id\": \"/asset/assetId\",
+							\"source\": \"PREDIX_ASSET\"
+						},
+
+						\"value\": \"/asset/compressor-2015\"
+					}
+				]
+			}
+		},
+
+		{
+			\"portIdentifier\": 
+			{
+				\"@type\": \"PortIdentifier\",
+				\"id\": \"ALARM_THRESHOLDDIFF\",
+				\"name\": \"ALARM_THRESHOLDDIFF\"
+			},
+
+			\"fieldSelection\": 
+			{
+				\"fieldIdentifier\": 
+				{
+					\"@type\": \"FieldIdentifier\",
+					\"id\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/deltaThreshold/value\",
+					\"name\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/deltaThreshold/value\",
+					\"source\": \"PREDIX_ASSET\"
+				},
+
+				\"resultId\": \"ALARM_THRESHOLDDIFF\"
+			},
+
+			\"selectionFilter\": 
+			{
+				\"@type\": \"FieldSelectionFilter\",
+				\"fieldIdentifierValue\": 
+				[
+					{
+						\"fieldIdentifier\": 
+						{
+							\"@type\": \"FieldIdentifier\",
+							\"id\": \"/asset/assetId\",
+							\"source\": \"PREDIX_ASSET\"
+						},
+
+						\"value\": \"/asset/compressor-2015\"
+					}
+				]
+			}
+		},
+
+		{
+			\"portIdentifier\": 
+			{
+				\"@type\": \"PortIdentifier\",
+				\"id\": \"ALARM_THRESHOLDLEVEL\",
+				\"name\": \"ALARM_THRESHOLDLEVEL\"
+			},
+
+			\"fieldSelection\": 
+			{
+				\"fieldIdentifier\": 
+				{
+					\"@type\": \"FieldIdentifier\",
+					\"id\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/deltaThresholdLevel/value\",
+					\"name\": \"/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/deltaThresholdLevel/value\",
+					\"source\": \"PREDIX_ASSET\"
+				},
+
+				\"resultId\": \"ALARM_THRESHOLDLEVEL\"
+			},
+
+			\"selectionFilter\": 
+			{
+				\"@type\": \"FieldSelectionFilter\",
+				\"fieldIdentifierValue\": 
+				[
+					{
+						\"fieldIdentifier\": 
+						{
+							\"@type\": \"FieldIdentifier\",
+							\"id\": \"/asset/assetId\",
+							\"source\": \"PREDIX_ASSET\"
+						},
+
+						\"value\": \"/asset/compressor-2015\"
+					}
+				]
+			}
+		}
+	]
+}
+      "
+     }
+  ]
+}

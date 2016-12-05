@@ -1,0 +1,44 @@
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xsi:schemaLocation="http://www.springframework.org/schema/rabbit
+           http://www.springframework.org/schema/rabbit/spring-rabbit.xsd
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/oxm
+           http://www.springframework.org/schema/oxm/spring-oxm.xsd">
+
+	<!-- read the queue name properties from an external file -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>classpath:Test-solution-change-event-queue.properties</value>
+		</property>
+	</bean>
+
+	<oxm:jaxb2-marshaller id="fieldChangedEventmarshaller">
+		<oxm:class-to-be-bound
+			name="com.ge.predix.event.fieldchanged.FieldChangedEvent" />
+		<oxm:class-to-be-bound
+			name="com.ge.predix.entity.fieldchanged.FieldChangedList" />
+	</oxm:jaxb2-marshaller>
+
+	<bean id="fieldChangedEventMessageConverter"
+		class="org.springframework.amqp.support.converter.MarshallingMessageConverter">
+		<constructor-arg index="0" ref="fieldChangedEventmarshaller" />
+	</bean>
+
+	<rabbit:connection-factory id="fieldChangedEventConnectionFactory"
+		addresses="${rabbitMQ.host}:${rabbitMQ.port}" />
+	<rabbit:admin connection-factory="fieldChangedEventConnectionFactory" />
+
+	<rabbit:template id="fieldChangedEventTemplate"
+		connection-factory="fieldChangedEventConnectionFactory"
+		message-converter="fieldChangedEventMessageConverter" />
+		
+	<rabbit:queue name="mainq" />
+	<rabbit:queue name="errorq" />
+
+</beans>
