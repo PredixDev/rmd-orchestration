@@ -1,0 +1,5 @@
+com.ge.predix.solsvc.dispatcherq.boot
+com.ge.predix.solsvc.dispatcherq.config
+com.ge.predix.solsvc.dispatcherq.consumer.handler
+com.ge.predix.solsvc.dispatcherq.orchestrationclient.clientstub
+com.ge.predix.solsvc.dispatcherq.util
