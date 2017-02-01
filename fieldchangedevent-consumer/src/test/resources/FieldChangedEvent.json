@@ -1,0 +1,38 @@
+{
+	"fieldChangedList": {
+		"fieldChanged": [{
+			"assetList": {
+				"asset": [{
+					"assetIdentifier": {
+						"complexType": "AssetIdentifier",
+						"id": "/asset/compressor-2015",
+						"name": "/asset/compressor-2015"
+					},
+					"assetIdFieldIdentifier": {
+						"complexType": "FieldIdentifier",
+						"id": "/asset/assetId",
+						"name": "/asset/assetId",
+						"source": "PREDIX_ASSET"
+					}
+				}]
+			},
+			"fieldIdentifierValueList": {
+				"fieldIdentifierValue": [{
+					"fieldIdentifier": {
+						"complexType": "FieldIdentifier",
+						"id": "/asset/assetTag/crank-frame-dischargepressure",
+						"name": "/asset/assetTag/crank-frame-dischargepressure",
+						"source": "PREDIX_ASSET"
+					}
+				}]
+			},
+			"timeChanged": 1347347773000,
+			"externalAttributeMap": {
+				"entry": [{
+					"key": "/asset/assetUri",
+					"value": "/asset/compressor-2015"
+				}]
+			}
+		}]
+	}
+}

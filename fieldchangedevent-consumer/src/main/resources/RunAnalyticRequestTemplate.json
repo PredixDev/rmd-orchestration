@@ -1,0 +1,201 @@
+{
+	"inputPort": [{
+		"portIdentifier": {
+			"complexType": "PortIdentifier",
+			"id": "ALARM_HI",
+			"name": "ALARM_HI"
+		},
+		"fieldSelection": {
+			"fieldIdentifier": {
+				"complexType": "FieldIdentifier",
+				"id": "/asset/assetTag/crank-frame-dischargepressure/outputMaximum",
+				"name": "/asset/assetTag/crank-frame-dischargepressure/outputMaximum",
+				"source": "PREDIX_ASSET"
+			},
+			"expectedDataType": "DMReal",
+			"resultId": "ALARM_HI"
+		},
+		"filter": {
+			"complexType": "AssetFilter",
+			"uri": "{{/asset/assetUri}}"
+		}
+	}, {
+		"portIdentifier": {
+			"complexType": "PortIdentifier",
+			"id": "ALARM_LO",
+			"name": "ALARM_LO"
+		},
+		"fieldSelection": {
+			"fieldIdentifier": {
+				"complexType": "FieldIdentifier",
+				"id": "/asset/assetTag/crank-frame-dischargepressure/outputMinimum",
+				"name": "/asset/assetTag/crank-frame-dischargepressure/outputMinimum",
+				"source": "PREDIX_ASSET"
+			},
+			"expectedDataType": "DMReal",
+			"resultId": "ALARM_LO"
+		},
+		"filter": {
+			"complexType": "AssetFilter",
+			"uri": "{{/asset/assetUri}}"
+		}
+	}, {
+		"portIdentifier": {
+			"complexType": "PortIdentifier",
+			"id": "TS_DATA",
+			"name": "TS_DATA"
+		},
+		"fieldSelection": {
+			"fieldIdentifier": {
+				"complexType": "FieldIdentifier",
+				"id": "/asset/assetTag/crank-frame-dischargepressure",
+				"name": "/asset/assetTag/crank-frame-dischargepressure",
+				"source": "PREDIX_TIMESERIES"
+			},
+			"expectedDataType": "DatapointsResponse",
+			"resultId": "TS_DATA"
+		},
+		"filter": {
+			"complexType": "AssetCriteriaAwareTimeseriesFilter",
+			"assetFieldDataCriteria": {
+				"namespaces": [],
+				"resultId": "sourceTagId",
+				"fieldSelection": [{
+					"fieldIdentifier": {
+						"complexType": "FieldIdentifier",
+						"id": "/asset/assetTag/crank-frame-dischargepressure/sourceTagId",
+						"source": "PREDIX_ASSET"
+					},
+					"expectedDataType": "DAString"
+				}],
+				"filter": {
+					"complexType": "AssetFilter",
+					"uri": "{{/asset/assetUri}}"
+				}
+			},
+			"timeseriesFilter": {
+				"complexType": "TimeseriesFilter",
+				"datapointsLatestQuery": {
+					"tags": [{
+						"name": "{{sourceTagId}}"
+					}]
+				}
+			}
+		}
+	}],
+	"outputPort": [{
+		"portIdentifier": {
+			"complexType": "PortIdentifier",
+			"id": "ALARM_STATUS",
+			"name": "ALARM_STATUS"
+		},
+		"fieldSelection": {
+			"fieldIdentifier": {
+				"complexType": "FieldIdentifier",
+				"id": "/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertStatus/value",
+				"name": "/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertStatus/value",
+				"source": "PREDIX_ASSET"
+			},
+			"resultId": "ALARM_STATUS"
+		},
+		"filter": {
+			"complexType": "AssetFilter",
+			"uri": "{{/asset/assetUri}}"
+		}
+	}, {
+		"portIdentifier": {
+			"complexType": "PortIdentifier",
+			"id": "ALARM_LEVEL",
+			"name": "ALARM_LEVEL"
+		},
+		"fieldSelection": {
+			"fieldIdentifier": {
+				"complexType": "FieldIdentifier",
+				"id": "/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertLevel/value",
+				"name": "/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertLevel/value",
+				"source": "PREDIX_ASSET"
+			},
+			"resultId": "ALARM_LEVEL"
+		},
+		"filter": {
+			"complexType": "AssetFilter",
+			"uri": "{{/asset/assetUri}}"
+		}
+	}, {
+		"portIdentifier": {
+			"complexType": "PortIdentifier",
+			"id": "ALARM_LEVEL_VALUE",
+			"name": "ALARM_LEVEL_VALUE"
+		},
+		"fieldSelection": {
+			"fieldIdentifier": {
+				"complexType": "FieldIdentifier",
+				"id": "/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertLevelValue/value",
+				"name": "/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertLevelValue/value",
+				"source": "PREDIX_ASSET"
+			},
+			"resultId": "ALARM_LEVEL_VALUE"
+		},
+		"filter": {
+			"complexType": "AssetFilter",
+			"uri": "{{/asset/assetUri}}"
+		}
+	}, {
+		"portIdentifier": {
+			"complexType": "PortIdentifier",
+			"id": "ALARM_LEVEL_VALUE_TIME",
+			"name": "ALARM_LEVEL_VALUE_TIME"
+		},
+		"fieldSelection": {
+			"fieldIdentifier": {
+				"complexType": "FieldIdentifier",
+				"id": "/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertTime/value",
+				"name": "/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/alertTime/value",
+				"source": "PREDIX_ASSET"
+			},
+			"resultId": "ALARM_LEVEL_VALUE_TIME"
+		},
+		"filter": {
+			"complexType": "AssetFilter",
+			"uri": "{{/asset/assetUri}}"
+		}
+	}, {
+		"portIdentifier": {
+			"complexType": "PortIdentifier",
+			"id": "ALARM_THRESHOLDDIFF",
+			"name": "ALARM_THRESHOLDDIFF"
+		},
+		"fieldSelection": {
+			"fieldIdentifier": {
+				"complexType": "FieldIdentifier",
+				"id": "/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/deltaThreshold/value",
+				"name": "/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/deltaThreshold/value",
+				"source": "PREDIX_ASSET"
+			},
+			"resultId": "ALARM_THRESHOLDDIFF"
+		},
+		"filter": {
+			"complexType": "AssetFilter",
+			"uri": "{{/asset/assetUri}}"
+		}
+	}, {
+		"portIdentifier": {
+			"complexType": "PortIdentifier",
+			"id": "ALARM_THRESHOLDLEVEL",
+			"name": "ALARM_THRESHOLDLEVEL"
+		},
+		"fieldSelection": {
+			"fieldIdentifier": {
+				"complexType": "FieldIdentifier",
+				"id": "/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/deltaThresholdLevel/value",
+				"name": "/asset/assetTag/crank-frame-dischargepressure/tagDatasource/tagExtensions/attributes/deltaThresholdLevel/value",
+				"source": "PREDIX_ASSET"
+			},
+			"resultId": "ALARM_THRESHOLDLEVEL"
+		},
+		"filter": {
+			"complexType": "AssetFilter",
+			"uri": "{{/asset/assetUri}}"
+		}
+	}]
+}

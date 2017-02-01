@@ -1,0 +1,19 @@
+---
+applications:
+  - name: dev-fieldchangedevent-consumer
+    buildpack: java_buildpack
+    memory: 512M
+    path: target/fieldchangedevent-consumer-2.0.0.jar
+    services:
+        - analytics-rmd-uaa
+        - analytics-rmd-rabbitmq
+env:
+    SPRING_PROFILES_ACTIVE : cloud,clouddev
+    predix_uaa_name: analytics-rmd-uaa
+    predix_oauth_clientId : app_client_id:secret
+    fieldChangedEvent_MainQueue: FieldChangedEventMainQueue
+    fieldChangedEvent_ErrorQueue: FieldChangedEventErrorQueue
+    #logging - see application-cloud.properties
+    logging_level_root: INFO
+    logging_level_org_springframework: INFO
+    logging_level_com_ge_predix_solsvc: DEBUG
