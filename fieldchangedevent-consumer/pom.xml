@@ -10,15 +10,15 @@
 	<properties>
 		<maven-failsafe-plugin.version>2.12</maven-failsafe-plugin.version>
 		<maven-surefire-plugin.version>2.16</maven-surefire-plugin.version>
-		<ext-model.version>2.0.10</ext-model.version>
-		<ext-util.version>2.0.10</ext-util.version>
-		<predix-rest-client.version>2.0.10</predix-rest-client.version>
+		<ext-model.version>2.0.11</ext-model.version>
+		<ext-util.version>2.0.11</ext-util.version>
+		<predix-rest-client.version>2.0.11</predix-rest-client.version>
 		<spring.version>4.1.6.RELEASE</spring.version>
 		<cxf.version>3.1.7</cxf.version>
 		<httpcomponents.version>4.5.2</httpcomponents.version>
 		<maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
 		<jmustache.version>1.13</jmustache.version>
-		<asset-bootstrap-client.version>2.0.10</asset-bootstrap-client.version>
+		<asset-bootstrap-client.version>2.0.11</asset-bootstrap-client.version>
 	</properties>
 
 	<parent>
