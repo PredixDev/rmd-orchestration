@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;

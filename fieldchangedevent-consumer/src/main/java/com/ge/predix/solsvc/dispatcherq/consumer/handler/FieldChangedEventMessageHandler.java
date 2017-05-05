@@ -13,11 +13,10 @@ package com.ge.predix.solsvc.dispatcherq.consumer.handler;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.cxf.helpers.IOUtils;
 import org.slf4j.Logger;
@@ -33,223 +32,216 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.ge.predix.entity.analytic.runanalytic.RunAnalyticRequest;
 import com.ge.predix.entity.eventasset.Asset;
 import com.ge.predix.entity.fieldchanged.FieldChanged;
-import com.ge.predix.entity.util.map.AttributeMap;
-import com.ge.predix.entity.util.map.Entry;
 import com.ge.predix.event.fieldchanged.FieldChangedEvent;
 import com.ge.predix.solsvc.dispatcherq.orchestrationclient.clientstub.RmdOrchestrationClient;
 import com.ge.predix.solsvc.ext.util.JsonMapper;
-import com.samskivert.mustache.Mustache;
-import com.samskivert.mustache.Template;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 
 /**
  * 
  * @author 212367843
  */
-@SuppressWarnings({ "nls" })
+@SuppressWarnings(
+{
+        "nls"
+})
 @Component
-public class FieldChangedEventMessageHandler implements MessageListener {
+public class FieldChangedEventMessageHandler
+        implements MessageListener
+{
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(FieldChangedEventMessageHandler.class.getName());
+    private static final Logger    logger = LoggerFactory.getLogger(FieldChangedEventMessageHandler.class.getName());
 
-	@Autowired
-	private MessageConverter fieldChangedEventMessageConverter;
+    @Autowired
+    private MessageConverter       fieldChangedEventMessageConverter;
 
-	@Autowired
-	private RmdOrchestrationClient client;
+    @Autowired
+    private RmdOrchestrationClient client;
 
-	@Autowired
-	private JsonMapper jsonMapper;
+    @Autowired
+    private JsonMapper             jsonMapper;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.amqp.core.MessageListener#onMessage(org.
-	 * springframework .amqp.core.Message)
-	 */
-	@Override
-	public void onMessage(Message message) {
-		onMessageDoWork(message);
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.springframework.amqp.core.MessageListener#onMessage(org.
+     * springframework .amqp.core.Message)
+     */
+    @Override
+    public void onMessage(Message message)
+    {
+        onMessageDoWork(message);
+    }
 
-	/**
-	 * @param message
-	 *            -
-	 * @return -
-	 */
-	public List<String> onMessageDoWork(Message message) {
-		// Get the java object from the payload
-		FieldChangedEvent fce = getFieldChangedEventFromPayload(message);
-		logger.info("Listener received message----->" + fce);
+    /**
+     * @param message
+     *            -
+     * @return -
+     */
+    public List<String> onMessageDoWork(Message message)
+    {
+        // Get the java object from the payload
+        FieldChangedEvent fce = getFieldChangedEventFromPayload(message);
+        String fceJsonString = this.jsonMapper.toJson(fce);
+        logger.info("Listener received message----->" + fceJsonString);
 
-		// Convert the retreived java object to the REST service request object
-		// and Invoke the REST service
-		try {
-			return convertFCEtoRunAnalyticAndRunOrchestration(fce);
-		} catch (JsonProcessingException e) {
-			logger.error("JsonProcessingException", e);
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			logger.error("IOException", e);
-			throw new RuntimeException(e);
-		}
-	}
+        // Convert the retreived java object to the REST service request object
+        // and Invoke the REST service
+        try
+        {
+            return convertFCEtoRunAnalyticAndRunOrchestration(fce, fceJsonString);
+        }
+        catch (JsonProcessingException e)
+        {
+            logger.error("JsonProcessingException", e);
+            throw new RuntimeException(e);
+        }
+        catch (IOException e)
+        {
+            logger.error("IOException", e);
+            throw new RuntimeException(e);
+        }
+    }
 
-	private FieldChangedEvent getFieldChangedEventFromPayload(Message payload) {
-		FieldChangedEvent fieldChangedEvent = (FieldChangedEvent) this.fieldChangedEventMessageConverter
-				.fromMessage(payload);
+    private FieldChangedEvent getFieldChangedEventFromPayload(Message payload)
+    {
+        FieldChangedEvent fieldChangedEvent = (FieldChangedEvent) this.fieldChangedEventMessageConverter
+                .fromMessage(payload);
 
-		logger.info("Listener received message----->" + fieldChangedEvent);
+        logger.info("Listener received message----->" + fieldChangedEvent);
 
-		return fieldChangedEvent;
-	}
+        return fieldChangedEvent;
+    }
 
-	private List<String> convertFCEtoRunAnalyticAndRunOrchestration(
-			final FieldChangedEvent fieldChangedEvent)
-			throws JsonProcessingException, IOException {
+    private List<String> convertFCEtoRunAnalyticAndRunOrchestration(final FieldChangedEvent fieldChangedEvent,
+            String fceJsonString)
+            throws JsonProcessingException, IOException
+    {
 
-		List<String> results = new ArrayList<String>();
-		for (FieldChanged fieldChanged : fieldChangedEvent
-				.getFieldChangedList().getFieldChanged()) {
-			logger.info("Field Identifier1 ="
-					+ fieldChanged.getFieldIdentifierValueList()
-							.getFieldIdentifierValue().get(0));
+        List<String> results = new ArrayList<String>();
+        for (FieldChanged fieldChanged : fieldChangedEvent.getFieldChangedList().getFieldChanged())
+        {
+            for (Asset asset : fieldChanged.getAssetList().getAsset())
+            {
 
-			logger.info("Field Identifier2 ="
-					+ fieldChanged.getFieldIdentifierValueList()
-							.getFieldIdentifierValue().get(0)
-							.getFieldIdentifier());
+                logger.info("Asset uri =" + asset.getUri());
+                logger.info("Asset type = " + asset.getAssetType());
 
-			for (Asset asset : fieldChanged.getAssetList().getAsset()) {
+                String orchestrationRequest = constructOrchRqstFromRunAnalyticRqst(fceJsonString);
 
-				logger.info("Asset Id =" + asset.getAssetIdentifier());
-				logger.info("Asset Id =" + asset.getAssetIdentifier().getId());
+                String result = this.client.runOrchestration(orchestrationRequest);
+                results.add(result);
+            }
+        }
+        return results;
 
-				String orchestrationRequest = constructOrchRqstFromRunAnalyticRqst(
-						fieldChanged.getExternalAttributeMap());
+    }
 
-				logger.info("");
-				String result = this.client
-						.runOrchestration(orchestrationRequest);
-				results.add(result);
-			}
-		}
-		return results;
+    private String constructOrchRqstFromRunAnalyticRqst(String fceJsonString)
+            throws JsonProcessingException, IOException
+    {
+        String orchRqst = null;
 
-	}
+        putAnalyticRequestInTemplate(fceJsonString);
+        FileInputStream workflowFile = null;
+        try
+        {
+            workflowFile = new FileInputStream(new File("alertStatusWorkflow.json"));
+            orchRqst = IOUtils.toString(workflowFile);
+            logger.info("Predix Orch Request = " + orchRqst);
 
-	private String constructOrchRqstFromRunAnalyticRqst(
-			AttributeMap externalAttributes)
-			throws JsonProcessingException, IOException {
-		String orchRqst = null;
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+        finally {
+            if ( workflowFile != null ) 
+                workflowFile.close();
+        }
 
-		putAnalyticRequestInTemplate(
-				externalAttributes);
+        return orchRqst;
+    }
 
-		try {
-			File jarPath = new File(FieldChangedEventMessageHandler.class
-					.getProtectionDomain().getCodeSource().getLocation()
-					.getPath());
-			String propertiesPath = jarPath.getParent();
-			propertiesPath = propertiesPath
-					+ "/predixOrchestrationRuntimeRequest.json";
+    private void putAnalyticRequestInTemplate(String fceJsonString)
+            throws JsonProcessingException, IOException
+    {
 
-			logger.info(" propertiesPath = " + propertiesPath);
-			// logger.info("Predix Orch Request json from file = " + new
-			// FileInputStream(propertiesPath));
-			File requestFile = new File(
-					"predixOrchestrationRuntimeRequest.json");
+        logger.info("ANALYTICS ENDPOINT = " + this.client.getAnalyticsEndpoint());
 
-			orchRqst = IOUtils.toString(new FileInputStream(requestFile));
-			logger.info("Predix Orch Request = " + orchRqst);
+        String analyticRequestData = searchAndReplace(fceJsonString);
 
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+        ObjectMapper m = new ObjectMapper();
+        logger.info("Predix Orch Request template json from file = " + getClass().getClassLoader()
+                .getResourceAsStream("orchestrations/alertStatusWorkflow/alertStatusWorkflowTemplate.json"));
+        JsonNode rootNode = m.readTree(getClass().getClassLoader()
+                .getResourceAsStream("orchestrations/alertStatusWorkflow/alertStatusWorkflowTemplate.json"));
 
-		return orchRqst;
-	}
+        // bpmnXml
+        JsonNode bpmnXmlNode = rootNode.path("bpmnXml");
+        String bpmnString = bpmnXmlNode.asText();
+        logger.info("bpmnXml value =" + bpmnString);
 
-	private void putAnalyticRequestInTemplate(
-			AttributeMap externalAttributes) throws JsonProcessingException,
-			IOException {
+        String replacedbpmnString = bpmnString.replaceAll("ANALYTICSENDPOINT", this.client.getAnalyticsEndpoint());
+        logger.info("replaced bpmnXml value =" + replacedbpmnString);
 
-		logger.info("ANALYTICS ENDPOINT = "
-				+ this.client.getAnalyticsEndpoint());
+        ((ObjectNode) rootNode).put("bpmnXml", replacedbpmnString);
 
-		String analyticRequestData = searchAndReplace(externalAttributes);
+        // analyticInputData
+        ArrayNode analyticInputDataNode = (ArrayNode) rootNode.path("analyticInputData");
+        for (int i = 0; i < analyticInputDataNode.size(); i++)
+        {
+            JsonNode dataNode1 = analyticInputDataNode.get(i);
+            JsonNode dataNode = analyticInputDataNode.get(i).get("data");
+            logger.info("dataNode = " + dataNode.asText());
+            ((ObjectNode) dataNode1).put("data", analyticRequestData);
+        }
+        m.writeValue(new File("alertStatusWorkflow.json"), rootNode);
+    }
 
-		ObjectMapper m = new ObjectMapper();
-		logger.info("Predix Orch Request template json from file = "
-				+ getClass().getClassLoader().getResourceAsStream(
-						"predixOrchestrationRuntimeRequestTemplate.json"));
-		JsonNode rootNode = m.readTree(getClass().getClassLoader()
-				.getResourceAsStream(
-						"predixOrchestrationRuntimeRequestTemplate.json"));
+    private String searchAndReplace(String fceJsonString)
+    {
 
-		// bpmnXml
-		JsonNode bpmnXmlNode = rootNode.path("bpmnXml");
-		String bpmnString = bpmnXmlNode.asText();
-		logger.info("bpmnXml value =" + bpmnString);
+        StringBuffer afterReplacingAnalyticRequestData = new StringBuffer();
 
-		String replacedbpmnString = bpmnString.replaceAll("ANALYTICSENDPOINT",
-				this.client.getAnalyticsEndpoint());
-		logger.info("replaced bpmnXml value =" + replacedbpmnString);
+        try
+        {
+            String beforeReplacingAnalyticRequestData = IOUtils.toString(getClass().getClassLoader()
+                    .getResourceAsStream("orchestrations/alertStatusWorkflow/alarmThresholdAnalyticTemplate.json"));
+            logger.info("Before Replacing RunAnalytic Request = " + beforeReplacingAnalyticRequestData);
 
-		((ObjectNode) rootNode).put("bpmnXml", replacedbpmnString);
+            final String regex = "(\\{\\{)(.*)(\\}\\})";
+            final Pattern p = Pattern.compile(regex);
+            final Matcher m = p.matcher(beforeReplacingAnalyticRequestData);
 
-		// analyticInputData
-		ArrayNode analyticInputDataNode = (ArrayNode) rootNode
-				.path("analyticInputData");
-		for (int i = 0; i < analyticInputDataNode.size(); i++) {
-			JsonNode dataNode1 = analyticInputDataNode.get(i);
-			JsonNode dataNode = analyticInputDataNode.get(i).get("data");
-			logger.info("dataNode = " + dataNode.asText());
-			((ObjectNode) dataNode1).put("data", analyticRequestData);
-		}
-		m.writeValue(new File("predixOrchestrationRuntimeRequest.json"),
-				rootNode);
-	}
+            while (m.find())
+            {
+                String whatToSrchFor = m.group(2);
+                logger.info("What to search for =" + whatToSrchFor);
+                List<String> srchResults = null;
 
-	private String searchAndReplace(AttributeMap whatToReplaceWith) {
+                try
+                {
+                    srchResults = JsonPath.parse(fceJsonString).read(whatToSrchFor);
+                }
+                catch (PathNotFoundException e)
+                {
+                    m.appendReplacement(afterReplacingAnalyticRequestData, "{{" + whatToSrchFor + "}}");
+                    continue;
+                }
 
-		String afterReplacingAnalyticRequestData = null;
+                m.appendReplacement(afterReplacingAnalyticRequestData, srchResults.get(0));
+            }
+            m.appendTail(afterReplacingAnalyticRequestData);
 
-		try {
-			String beforeReplacingAnalyticRequestData = IOUtils
-					.toString(getClass().getClassLoader().getResourceAsStream(
-							"RunAnalyticRequestTemplate.json"));
-			logger.info("Before Replacing RunAnalytic Request = "
-					+ beforeReplacingAnalyticRequestData);
-
-			/*
-			 * Map<String, Object> anotherWhatToReplaceWith = new
-			 * HashMap<String, Object>();
-			 * 
-			 * Template template = Mustache.compiler().compile(
-			 * beforeReplacingAnalyticRequestData); for (Entry replaceWithThis :
-			 * whatToReplaceWith.getEntry()) {
-			 * anotherWhatToReplaceWith.put((String) replaceWithThis.getKey(),
-			 * replaceWithThis.getValue()); }
-			 * 
-			 * return template.execute(anotherWhatToReplaceWith);
-			 */
-
-			for (Entry replaceWithThis : whatToReplaceWith.getEntry()) {
-				afterReplacingAnalyticRequestData = beforeReplacingAnalyticRequestData.replaceAll(
-						"\\{\\{" + (String) replaceWithThis.getKey() + "\\}\\}",
-						(String) replaceWithThis.getValue());
-				logger.info("After Replacing RunAnalytic Request = "
-						+ afterReplacingAnalyticRequestData);
-				beforeReplacingAnalyticRequestData = afterReplacingAnalyticRequestData;
-			}
-
-			return afterReplacingAnalyticRequestData;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+            logger.info("After search and replacement =" + afterReplacingAnalyticRequestData);
+            return afterReplacingAnalyticRequestData.toString();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
 }

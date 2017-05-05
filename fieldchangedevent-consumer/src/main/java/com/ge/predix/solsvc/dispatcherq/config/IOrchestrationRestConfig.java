@@ -7,7 +7,7 @@
  * with the terms and conditions stipulated in the agreement/contract
  * under which the software has been supplied.
  */
- 
+
 package com.ge.predix.solsvc.dispatcherq.config;
 
 /**
@@ -21,13 +21,15 @@ public interface IOrchestrationRestConfig
      * @return -
      */
     public String getOrchestrationEndpoint();
+
     /**
      * @return -
      */
     public String getAnalyticsEndpoint();
+
     /**
      * @return -
      */
     public String getZoneId();
-    
+
 }

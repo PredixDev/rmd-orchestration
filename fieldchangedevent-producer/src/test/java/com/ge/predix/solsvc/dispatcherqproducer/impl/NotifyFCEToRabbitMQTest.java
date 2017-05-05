@@ -8,50 +8,59 @@
  * under which the software has been supplied.
  */
 
-package com.ge.predix.solsvc.dispatcherq.consumer;
+package com.ge.predix.solsvc.dispatcherqproducer.impl;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+
 import org.apache.cxf.helpers.IOUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.amqp.core.Message;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.ge.predix.event.fieldchanged.FieldChangedEvent;
 import com.ge.predix.solsvc.ext.util.JsonMapper;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 
 /**
  * 
  * @author 212367843
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:Test-solution-change-event-consumer.xml")
-public class OrchestrationConsumerTestHarness {
+public class NotifyFCEToRabbitMQTest {
 
-	@Autowired
+	@InjectMocks
+	private NotifyFieldChangedEventToRabbitMQueue notifyToQ;
+	
+	@Mock
 	private RabbitTemplate fieldChangedEventTemplate;
-
-	@Autowired
+	
+	@Mock
 	private MessageConverter messageConverter;
 	
 	@Autowired
 	private JsonMapper jsonMapper;
-
+	
 	/**
 	 * @throws java.lang.Exception
 	 *             -
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		// Do set up here
+		// setUp before run
 	}
 
 	/**
@@ -60,7 +69,7 @@ public class OrchestrationConsumerTestHarness {
 	 */
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		// Cleanup after execution
+		// clean up
 	}
 
 	/**
@@ -69,7 +78,7 @@ public class OrchestrationConsumerTestHarness {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		// setUp
+		MockitoAnnotations.initMocks(this);
 	}
 
 	/**
@@ -83,32 +92,23 @@ public class OrchestrationConsumerTestHarness {
 
 	/**
 	 * -
+	 * @throws Exception -
 	 */
 	@Test
-	public void test() {
-		Message msg = this.messageConverter
-				.toMessage(createFieldChangedEvent(), null);
+	public void testNotifyFieldChangedEvent() throws Exception {
+		ConnectionFactory mockConnectionFactory = mock(ConnectionFactory.class);
+		Connection mockConnection = mock(Connection.class);
+		Channel mockChannel = mock(Channel.class);
 
-		this.fieldChangedEventTemplate.convertAndSend("mainq", msg); //$NON-NLS-1$
+		when(mockConnectionFactory.newConnection((ExecutorService) null)).thenReturn(mockConnection);
+		when(mockConnection.isOpen()).thenReturn(true);
+		when(mockConnection.createChannel()).thenReturn(mockChannel);
+
+		when(mockChannel.isOpen()).thenReturn(true);
+
+
+		this.fieldChangedEventTemplate = new RabbitTemplate(new CachingConnectionFactory(mockConnectionFactory)); 
+
+		this.notifyToQ.notify(mock(FieldChangedEvent.class));
 	}
-
-	@SuppressWarnings("nls")
-    private FieldChangedEvent createFieldChangedEvent() {
-		FieldChangedEvent fieldChangedEvent = new FieldChangedEvent();
-
-		try {
-			String fieldChangedEventJsonString = IOUtils.toString(getClass()
-					.getClassLoader().getResourceAsStream(
-							"FieldChangedEvent.json"));
-
-			fieldChangedEvent = this.jsonMapper.fromJson(
-					fieldChangedEventJsonString, FieldChangedEvent.class);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return fieldChangedEvent;
-	}
-
 }

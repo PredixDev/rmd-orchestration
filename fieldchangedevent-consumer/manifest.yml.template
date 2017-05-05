@@ -2,19 +2,18 @@ applications:
   - name: {your-name}-fieldchangedevent-consumer
     buildpack: java_buildpack
     memory: 512M
-    path: target/fieldchangedevent-consumer-2.0.0.jar
-    i : 2
+    path: target/fieldchangedevent-consumer-2.0.7.jar
+    i : 1
     services:
         - {rabbitMQService}
         - {uaaService}
+        - {afService}
 env:
     # NOTE: Some values in curly braces are updated by scripts
     predix_uaa_name: {uaaService}
     predix_oauth_clientId : {clientId}:{secret}
     predix_orchestration_zoneid : {analyticsRuntimeZone}
-    predix_orchestration_restProtocol : https
-    predix_orchestration_restHost : {analyticsRuntimeService}
-    predix_orchestration_restPort : 443
+    predix_orchestration : {afService}
     predix_orchestration_restBaseResource : api/v1/execution
     fieldChangedEvent_MainQueue: FieldChangedEventMainQueue
     fieldChangedEvent_ErrorQueue: FieldChangedEventErrorQueue

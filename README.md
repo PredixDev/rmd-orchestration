@@ -4,94 +4,40 @@
 <a href="http://predixdev.github.io/rmd-orchestration" target="_blank">
 	<img height="50px" width="100px" src="images/pages.jpg" alt="view github pages">
 </a>
-##RMD Orchestration
-As data arrives (or changes) an event is placed on a messaging queue. This project reads messages off those queues, decides which Analytic Orchestration to invoke, grabs the BPMN and Analytic Configuration and passes that to the Predix Orchestration engine which in turn invokes [Analytic microservices](https://github.com/predixdev/rmd-analytics).
+##RMD Orchestration- How this works
+- Orchestration, by design, will be listening on a specific queue for a specific TYPE of event. Queue name and the connection to the queue will be established at the deployment time.
+- Once the event is read from the queue, listener with the help of routing rules decide which orchestration to execute based on the event's message content. 
+- Predix Orchestration Runtime executes the orchestration, which in turn, can invoke one or more analytics based on the content of message.
 
 <img src='https://github.com/predixdev/predix-rmd-ref-app/raw/master/images/RefApp-AnalyticsFlow.png' >
 
-## Sample XML Data placed in the queue
-```json
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ns10:fieldChangedEvent xmlns="http://ge.com/predix/entity/identifier" xmlns:ns2="http://ge.com/predix/entity/solution/identifier/solutionidentifier" xmlns:ns3="http://ge.com/predix/entity/eventAsset/eventAssetidentifier" xmlns:ns4="http://ge.com/predix/entity/field/fieldidentifier" xmlns:ns5="http://ge.com/predix/entity/eventAsset" xmlns:ns6="http://ge.com/predix/entity/fieldidentifiervalue" xmlns:ns7="http://ge.com/predix/entity/assetselector" xmlns:ns8="http://ge.com/predix/entity/fieldchanged" xmlns:ns9="http://ge.com/predix/entity/util/map" xmlns:ns10="http://ge.com/predix/event/fieldchanged">
-<ns8:fieldChangedList>
-    <ns8:fieldChanged>
-        <ns2:solutionIdentifier>
-            <id xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:int">1001</id>
-            <name>Predix RMD Reference Application</name>
-        </ns2:solutionIdentifier>
-        <ns5:assetList>
-            <ns5:asset>
-                <ns3:assetIdentifier>
-                    <id xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:string">/asset/compressor-2015</id>
-                    <name>/asset/compressor-2015</name>
-                </ns3:assetIdentifier>
-                <ns5:assetIdFieldIdentifier>
-                    <id xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:string">/asset/assetId</id>
-                    <name>/asset/assetId</name>
-                    <ns4:source>PREDIX_ASSET</ns4:source>
-                </ns5:assetIdFieldIdentifier>
-            </ns5:asset>
-        </ns5:assetList>
-        <ns6:fieldIdentifierValueList>
-            <ns6:fieldIdentifierValue>
-                <ns4:fieldIdentifier>
-                    <id xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:string">/asset/assetTag/crank-frame-dischargepressure</id>
-                    <name>/asset/assetTag/crank-frame-dischargepressure</name>
-                    <ns4:source>PREDIX_ASSET</ns4:source>
-                </ns4:fieldIdentifier>
-            </ns6:fieldIdentifierValue>
-        </ns6:fieldIdentifierValueList>
-        <ns8:timeChanged>2012-09-11T07:16:13.000Z</ns8:timeChanged>
-        <ns9:externalAttributeMap>
-				<ns9:entry>
-					<ns9:key>/asset/assetUri</ns9:key>
-					<ns9:value>/asset/compressor-2015</ns9:value>
-				</ns9:entry>
-        </ns9:externalAttributeMap>
-    </ns8:fieldChanged>
-</ns8:fieldChangedList>
-</ns10:fieldChangedEvent>
-```
-
-## JSON version of FieldChangedEvent for reference
+## Sample FieldChangedEvent json
 ```json
 {
-	"fieldChangedList": {
-		"fieldChanged": [{
-			"assetList": {
-				"asset": [{
-					"assetIdentifier": {
-						"complexType": "AssetIdentifier",
-						"id": "/asset/compressor-2015",
-						"name": "/asset/compressor-2015"
-					},
-					"assetIdFieldIdentifier": {
-						"complexType": "FieldIdentifier",
-						"id": "/asset/assetId",
-						"name": "/asset/assetId",
-						"source": "PREDIX_ASSET"
-					}
-				}]
-			},
-			"fieldIdentifierValueList": {
-				"fieldIdentifierValue": [{
-					"fieldIdentifier": {
-						"complexType": "FieldIdentifier",
-						"id": "/asset/assetTag/crank-frame-dischargepressure",
-						"name": "/asset/assetTag/crank-frame-dischargepressure",
-						"source": "PREDIX_ASSET"
-					}
-				}]
-			},
-			"timeChanged": 1347347773000,
-			"externalAttributeMap": {
-				"entry": [{
-					"key": "/asset/assetUri",
-					"value": "/asset/compressor-2015"
-				}]
-			}
-		}]
-	}
+        "fieldChangedList": {
+                "fieldChanged": [{
+                        "assetList": {
+                                "asset": [{
+                                        "uri": "/asset/compressor-2017",
+                                        "assetType": "asset",
+                                        "fieldList": {
+                                                "field": [{
+                                                        "fieldKey": "/asset/assetTag/crank-frame-dischargepressure",
+                                                        "fieldValue": "",
+                                                        "fieldType": "assetTag",
+                                                        "timeChanged": "2012-09-11T07:16:13.000Z"
+                                                }]
+                                        }
+                                }]
+                        },
+                        "externalAttributeMap": {
+                                "entry": [{
+                                        "key": "",
+                                        "value": ""
+                                }]
+                        }
+                }]
+        }
 }
 ```
 ##Tech Stack

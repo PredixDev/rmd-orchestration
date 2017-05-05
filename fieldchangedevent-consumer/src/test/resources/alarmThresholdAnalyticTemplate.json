@@ -77,7 +77,7 @@
 				"complexType": "TimeseriesFilter",
 				"datapointsLatestQuery": {
 					"tags": [{
-						"name": "{{tag}}"
+						"name": "Compressor-2015:DischargePressure"
 					}]
 				}
 			}

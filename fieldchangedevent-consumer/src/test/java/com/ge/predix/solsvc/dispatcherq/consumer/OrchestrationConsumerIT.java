@@ -10,272 +10,351 @@
 
 package com.ge.predix.solsvc.dispatcherq.consumer;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.cxf.helpers.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.junit.Assert;
 
 import com.ge.predix.entity.asset.Asset;
-import com.ge.predix.entity.eventasset.AssetList;
-import com.ge.predix.entity.eventasset.eventassetidentifier.AssetIdentifier;
-import com.ge.predix.entity.field.fieldidentifier.FieldIdentifier;
-import com.ge.predix.entity.fieldchanged.FieldChanged;
-import com.ge.predix.entity.fieldchanged.FieldChangedList;
-import com.ge.predix.entity.fieldidentifiervalue.FieldIdentifierValue;
-import com.ge.predix.entity.fieldidentifiervalue.FieldIdentifierValueList;
-import com.ge.predix.entity.util.map.AttributeMap;
-import com.ge.predix.entity.util.map.Entry;
+import com.ge.predix.entity.timeseries.datapoints.ingestionrequest.Body;
+import com.ge.predix.entity.timeseries.datapoints.ingestionrequest.DatapointsIngestion;
 import com.ge.predix.event.fieldchanged.FieldChangedEvent;
 import com.ge.predix.solsvc.bootstrap.ams.common.AssetConfig;
 import com.ge.predix.solsvc.bootstrap.ams.dto.Attribute;
+import com.ge.predix.solsvc.bootstrap.ams.factories.ModelFactory;
 import com.ge.predix.solsvc.dispatcherq.boot.FieldChangedEventConsumerApplication;
 import com.ge.predix.solsvc.dispatcherq.consumer.handler.FieldChangedEventMessageHandler;
-import com.ge.predix.solsvc.dispatcherq.util.StringUtil;
+import com.ge.predix.solsvc.ext.util.JsonMapper;
 import com.ge.predix.solsvc.restclient.impl.RestClient;
-import com.ge.predix.solsvc.bootstrap.ams.factories.ModelFactory;
+import com.ge.predix.solsvc.timeseries.bootstrap.client.TimeseriesClient;
 
 /**
  * 
  * @author 212367843
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = { FieldChangedEventConsumerApplication.class })
-@ContextConfiguration(locations = {
-		"classpath*:META-INF/spring/ext-util-scan-context.xml",
-		"classpath*:META-INF/spring/asset-bootstrap-client-scan-context.xml",
-		"classpath*:META-INF/spring/predix-rest-client-scan-context.xml",
-		"classpath*:META-INF/spring/predix-rest-client-sb-properties-context.xml",
-		"classpath*:Test-solution-change-event-consumer.xml" })
-public class OrchestrationConsumerIT {
+@SpringApplicationConfiguration(classes =
+{
+        FieldChangedEventConsumerApplication.class
+})
+@ContextConfiguration(locations =
+{
+        "classpath*:META-INF/spring/ext-util-scan-context.xml",
+        "classpath*:META-INF/spring/asset-bootstrap-client-scan-context.xml",
+        "classpath*:META-INF/spring/predix-websocket-client-scan-context.xml",
+        "classpath*:META-INF/spring/timeseries-bootstrap-scan-context.xml",
+        "classpath*:META-INF/spring/predix-rest-client-scan-context.xml",
+        "classpath*:META-INF/spring/predix-rest-client-sb-properties-context.xml",
+        "classpath*:Test-solution-change-event-consumer.xml"
+})
+public class OrchestrationConsumerIT
+{
 
-	@Autowired
-	private FieldChangedEventMessageHandler fieldChangedEventMessageHandler;
+    /**
+     * 
+     */
+    static final Logger                     log = LoggerFactory.getLogger(OrchestrationConsumerIT.class);
 
-	@Autowired
-	private MessageConverter messageConverter;
+    @Autowired
+    private FieldChangedEventMessageHandler fieldChangedEventMessageHandler;
 
-	@Autowired
-	private ModelFactory modelFactory;
+    @Autowired
+    private MessageConverter                messageConverter;
 
-	@Autowired
-	private RestClient restClient;
+    @Autowired
+    private ModelFactory                    modelFactory;
 
-	@Autowired
-	private AssetConfig assetConfig;
+    @Autowired
+    private RestClient                      restClient;
 
-	/**
-	 * @throws java.lang.Exception
-	 *             -
-	 */
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		// Do set up here
-	}
+    @Autowired
+    private AssetConfig                     assetConfig;
 
-	/**
-	 * @throws java.lang.Exception
-	 *             -
-	 */
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		// Cleanup after execution
-	}
+    @Autowired
+    private JsonMapper                      jsonMapper;
 
-	/**
-	 * @throws java.lang.Exception
-	 *             -
-	 */
-	@Before
-	public void setUp() throws Exception {
-		// setUp
-	}
+    @Autowired
+    private TimeseriesClient                timeseriesClient;
 
-	/**
-	 * @throws java.lang.Exception
-	 *             -
-	 */
-	@After
-	public void tearDown() throws Exception {
-		// clean up
-	}
+    private List<Header>                    timeseriesHeaders;
 
-	/**
-	 * -
-	 */
-	@SuppressWarnings("nls")
-	@Test
-	public void testFieldChangedAndAlarmAccordingly() {
+    /**
+     * @throws java.lang.Exception
+     *             -
+     */
+    @BeforeClass
+    public static void setUpBeforeClass()
+            throws Exception
+    {
+        // Do set up here
+    }
 
-		List<Header> headers = setHeaders();
+    /**
+     * @throws java.lang.Exception
+     *             -
+     */
+    @AfterClass
+    public static void tearDownAfterClass()
+            throws Exception
+    {
+        // Cleanup after execution
+    }
 
-		setAlertStatus(headers, true);
+    /**
+     * @throws java.lang.Exception
+     *             -
+     */
+    @Before
+    public void setUp()
+            throws Exception
+    {
+        // setUp
+    }
 
-		Message msg = this.messageConverter.toMessage(
-				createFieldChangedEvent(
-						"/asset/assetTag/crank-frame-dischargepressure", //$NON-NLS-1$
-						"/asset/assetTag/crank-frame-dischargepressure", //$NON-NLS-1$
-						"/asset/compressor-2015", //$NON-NLS-1$
-						StringUtil.parseDate("2012-09-11T07:16:13"), //$NON-NLS-1$
-						"/asset/assetUri", "/asset/compressor-2015"), null);
+    /**
+     * @throws java.lang.Exception
+     *             -
+     */
+    @After
+    public void tearDown()
+            throws Exception
+    {
+        // clean up
+    }
 
-		List<String> results = this.fieldChangedEventMessageHandler
-				.onMessageDoWork(msg);
+    /**
+     * -
+     */
+    @Test
+    public void testFieldChangedAndAlarmAccordingly()
+    {
 
-		verifyResponse(headers, results);
-	}
+        List<Header> headers = setHeaders();
 
-	private void verifyResponse(List<Header> headers, List<String> results) {
+        setAlertStatus(headers, true);
+        Integer actualDatapoint = new Integer(29);
+        createDatapoint(actualDatapoint);
 
-		Assert.assertNotNull(results);
-		for (String result : results) {
-			Assert.assertTrue(!result.contains("errorMsg"));
-		}
+        Message msg = this.messageConverter.toMessage(createFieldChangedEvent(), null);
 
-		List<Object> models = this.modelFactory
-				.getModels(
-						"/asset/compressor-2015.tag-extensions.crank-frame-discharge-pressure",
-						"Asset", headers);
+        List<String> results = this.fieldChangedEventMessageHandler.onMessageDoWork(msg);
 
-		if (((Attribute) ((Asset) models.get(0)).getAttributes().get(
-				"alertLevelValue")).getValue().get(0) instanceof Integer) {
-			Integer actualValueOfSensor = (Integer) ((Attribute) ((Asset) models
-					.get(0)).getAttributes().get("alertLevelValue")).getValue()
-					.get(0);
+        verifyResponse(headers, results);
+    }
 
-			if (actualValueOfSensor > 23) {
-				Assert.assertEquals(true,
-						(Boolean) ((Attribute) ((Asset) models.get(0))
-								.getAttributes().get("alertStatus")).getValue()
-								.get(0));
-			} else {
-				Assert.assertEquals(false,
-						(Boolean) ((Attribute) ((Asset) models.get(0))
-								.getAttributes().get("alertStatus")).getValue()
-								.get(0));
-			}
-		} else if (((Attribute) ((Asset) models.get(0)).getAttributes().get(
-				"alertLevelValue")).getValue().get(0) instanceof Double) {
-			Double actualValueOfSensor = (Double) ((Attribute) ((Asset) models
-					.get(0)).getAttributes().get("alertLevelValue")).getValue()
-					.get(0);
+    /**
+     * @throws IOException -
+     */
+    @SuppressWarnings("nls")
+    @Test
+    public void testRunAnalyticTemplateVariableMatch()
+            throws IOException
+    {
+        final String regex = "(\\{\\{)(.*)(\\}\\})";
+        final String string = IOUtils
+                .toString(getClass().getClassLoader().getResourceAsStream("alarmThresholdAnalyticTemplate.json"));
 
-			if (actualValueOfSensor > 23) {
-				Assert.assertEquals(true,
-						(Boolean) ((Attribute) ((Asset) models.get(0))
-								.getAttributes().get("alertStatus")).getValue()
-								.get(0));
-			} else {
-				Assert.assertEquals(false,
-						(Boolean) ((Attribute) ((Asset) models.get(0))
-								.getAttributes().get("alertStatus")).getValue()
-								.get(0));
-			}
-		}
+        final Pattern pattern = Pattern.compile(regex);
+        final Matcher matcher = pattern.matcher(string);
 
-	}
+        while (matcher.find())
+        {
+            log.info("Full match: " + matcher.group(0));
+            for (int i = 1; i <= matcher.groupCount(); i++)
+            {
+                log.info("Group " + i + ": " + matcher.group(i));
+            }
+        }
 
-	private void setAlertStatus(List<Header> headers, Boolean status) {
-		List<Object> models = this.modelFactory
-				.getModels(
-						"/asset/compressor-2015.tag-extensions.crank-frame-discharge-pressure",
-						"Asset", headers);
+    }
 
-		((Attribute) ((Asset) models.get(0)).getAttributes().get("alertStatus"))
-				.getValue().set(0, status);
+    @SuppressWarnings("nls")
+    private void createDatapoint(Integer actualValueOfSensor)
+    {
+        DatapointsIngestion dpIngestion = new DatapointsIngestion();
+        dpIngestion.setMessageId(String.valueOf(System.currentTimeMillis()));
 
-		this.modelFactory.updateModel(models.get(0), "Asset", headers);
-	}
+        List<Object> datapoint1 = new ArrayList<Object>();
+        datapoint1.add(System.currentTimeMillis());
+        datapoint1.add(actualValueOfSensor);
+        datapoint1.add(3); // quality
 
-	private List<Header> setHeaders() {
+        List<Object> datapoints = new ArrayList<Object>();
+        datapoints.add(datapoint1);
 
-		List<Header> headers = this.restClient.getSecureTokenForClientId();
-		this.restClient.addZoneToHeaders(headers, this.assetConfig.getZoneId());
+        Body body = new Body();
+        body.setName("Compressor-2017:DischargePressure");
+        body.setDatapoints(datapoints);
 
-		Header header = new BasicHeader("Content-Type", "application/json");
-		headers.add(header);
-		header = new BasicHeader("Accept", "application/json");
-		headers.add(header);
+        List<Body> bodies = new ArrayList<Body>();
+        bodies.add(body);
 
-		return headers;
-	}
+        dpIngestion.setBody(bodies);
 
-	private FieldChangedEvent createFieldChangedEvent(String triggerField,
-			String triggerFieldName, String assetId, Date time,
-			Object externalMapKey, Object externalMapValue) {
-		FieldChangedEvent fieldChangedEvent = new FieldChangedEvent();
+        this.timeseriesClient.createTimeseriesWebsocketConnectionPool();
+        this.timeseriesClient.postDataToTimeseriesWebsocket(dpIngestion);
 
-		FieldChanged fieldChanged = new FieldChanged();
-		AttributeMap attributeMap = new AttributeMap();
-		if (externalMapKey != null) {
-			Entry entry = new Entry();
+        queryForLatestDatapoints(actualValueOfSensor);
+    }
 
-			entry.setKey(externalMapKey);
-			entry.setValue(externalMapValue);
-			attributeMap.getEntry().add(entry);
-		}
-		fieldChanged.setExternalAttributeMap(attributeMap);
+    @SuppressWarnings("nls")
+    private void queryForLatestDatapoints(Integer actualValueOfSensor)
+    {
+        boolean done = false;
+        while (!done)
+        {
+            com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.DatapointsLatestQuery datapoints = new com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.DatapointsLatestQuery();
+            com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.Tag tag = new com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.Tag();
+            tag.setName("Compressor-2017:DischargePressure"); //$NON-NLS-1$
 
-		fieldChanged.setTimeChanged(StringUtil.getXMLDate(time));
+            List<com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.Tag> tagList = new ArrayList<com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.Tag>();
+            tagList.add(tag);
+            datapoints.setTags(tagList);
+            this.timeseriesHeaders = this.timeseriesClient.getTimeseriesHeaders();
+            com.ge.predix.entity.timeseries.datapoints.queryresponse.DatapointsResponse response = this.timeseriesClient
+                    .queryForLatestDatapoint(datapoints, this.timeseriesHeaders);
+            assertNotNull(response);
+            try
+            {
+                assertEquals(((List<?>) response.getTags().get(0).getResults().get(0).getValues().get(0)).get(1),
+                        actualValueOfSensor);
+                done = true;
+            }
+            catch (AssertionError e)
+            {
+                try
+                {
+                    log.warn("timeseries value=" + actualValueOfSensor + " is not available yet, sleeping");
+                    Thread.sleep(3000);
+                }
+                catch (InterruptedException e1)
+                {
+                    throw new RuntimeException(e1);
+                }
+            }
 
-		FieldIdentifierValueList fieldIdentifierValueList = new FieldIdentifierValueList();
-		List<FieldIdentifierValue> fieldIdentifierValues = new ArrayList<FieldIdentifierValue>();
+        }
+    }
 
-		FieldIdentifierValue fieldIdentifierValue = new FieldIdentifierValue();
-		FieldIdentifier fieldIdentifier = createFieldIdentifier(triggerField,
-				triggerFieldName);
-		// Orchestration
-		fieldIdentifierValue.setFieldIdentifier(fieldIdentifier);
-		fieldIdentifierValues.add(fieldIdentifierValue);
-		fieldIdentifierValueList.setFieldIdentifierValue(fieldIdentifierValues);
-		fieldChanged.setFieldIdentifierValueList(fieldIdentifierValueList);
+    @SuppressWarnings("nls")
+    private void verifyResponse(List<Header> headers, List<String> results)
+    {
 
-		AssetList assetList = new AssetList();
-		com.ge.predix.entity.eventasset.Asset asset = new com.ge.predix.entity.eventasset.Asset();
+        log.debug("Results = " + results);
+        Assert.assertNotNull(results);
+        for (String result : results)
+        {
+            Assert.assertTrue(!result.contains("errorMsg"));
+        }
 
-		FieldIdentifier assetFieldIdentifier = createFieldIdentifier(
-				"/asset/assetId", "/asset/assetId"); //$NON-NLS-1$ //$NON-NLS-2$
-		asset.setAssetIdFieldIdentifier(assetFieldIdentifier);
-		AssetIdentifier assetIdentifier = new AssetIdentifier();
-		assetIdentifier.setId(assetId);
-		assetIdentifier.setName(assetId);
-		asset.setAssetIdentifier(assetIdentifier);
+        List<Object> models = this.modelFactory
+                .getModels("/asset/compressor-2017.alert-status.crank-frame-discharge-pressure", "Asset", headers);
 
-		assetList.getAsset().add(asset);
+        if ( ((Attribute) ((Asset) models.get(0)).getAttributes().get("alertLevelValue")).getValue()
+                .get(0) instanceof Integer )
+        {
+            Integer actualValueOfSensor = (Integer) ((Attribute) ((Asset) models.get(0)).getAttributes()
+                    .get("alertLevelValue")).getValue().get(0);
 
-		fieldChanged.setAssetList(assetList);
+            if ( actualValueOfSensor > 23 )
+            {
+                Assert.assertEquals(true,
+                        ((Attribute) ((Asset) models.get(0)).getAttributes().get("alertStatus")).getValue().get(0));
+            }
+            else
+            {
+                Assert.assertEquals(false,
+                        ((Attribute) ((Asset) models.get(0)).getAttributes().get("alertStatus")).getValue().get(0));
+            }
+        }
+        else if ( ((Attribute) ((Asset) models.get(0)).getAttributes().get("alertLevelValue")).getValue()
+                .get(0) instanceof Double )
+        {
+            Double actualValueOfSensor = (Double) ((Attribute) ((Asset) models.get(0)).getAttributes()
+                    .get("alertLevelValue")).getValue().get(0);
 
-		List<FieldChanged> lstFieldChanged = new ArrayList<FieldChanged>();
-		lstFieldChanged.add(fieldChanged);
+            if ( actualValueOfSensor > 23 )
+            {
+                Assert.assertEquals(true,
+                        ((Attribute) ((Asset) models.get(0)).getAttributes().get("alertStatus")).getValue().get(0));
+            }
+            else
+            {
+                Assert.assertEquals(false,
+                        ((Attribute) ((Asset) models.get(0)).getAttributes().get("alertStatus")).getValue().get(0));
+            }
+        }
 
-		FieldChangedList fieldChangedList = new FieldChangedList();
-		fieldChangedList.getFieldChanged().addAll(lstFieldChanged);
-		fieldChangedEvent.setFieldChangedList(fieldChangedList);
-		return fieldChangedEvent;
-	}
+    }
 
-	private FieldIdentifier createFieldIdentifier(String fieldId,
-			String fieldName) {
-		FieldIdentifier assetFieldIdentifier = new FieldIdentifier();
-		assetFieldIdentifier.setId(fieldId);
-		assetFieldIdentifier.setName(fieldName);
-		assetFieldIdentifier.setSource("PREDIX_ASSET"); //$NON-NLS-1$
-		return assetFieldIdentifier;
-	}
+    @SuppressWarnings("nls")
+    private void setAlertStatus(List<Header> headers, Boolean status)
+    {
+        List<Object> models = this.modelFactory
+                .getModels("/asset/compressor-2017.alert-status.crank-frame-discharge-pressure", "Asset", headers);
+
+        ((Attribute) ((Asset) models.get(0)).getAttributes().get("alertStatus")).getValue().set(0, status);
+
+        this.modelFactory.updateModel(models.get(0), "Asset", headers);
+    }
+
+    @SuppressWarnings("nls")
+    private List<Header> setHeaders()
+    {
+
+        List<Header> headers = this.restClient.getSecureTokenForClientId();
+        this.restClient.addZoneToHeaders(headers, this.assetConfig.getZoneId());
+
+        Header header = new BasicHeader("Content-Type", "application/json");
+        headers.add(header);
+        header = new BasicHeader("Accept", "application/json");
+        headers.add(header);
+
+        return headers;
+    }
+
+    @SuppressWarnings("nls")
+    private FieldChangedEvent createFieldChangedEvent()
+    {
+        FieldChangedEvent fieldChangedEvent = new FieldChangedEvent();
+
+        try
+        {
+            String fieldChangedEventJsonString = IOUtils
+                    .toString(getClass().getClassLoader().getResourceAsStream("FieldChangedEvent.json"));
+
+            fieldChangedEvent = this.jsonMapper.fromJson(fieldChangedEventJsonString, FieldChangedEvent.class);
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return fieldChangedEvent;
+    }
 
 }

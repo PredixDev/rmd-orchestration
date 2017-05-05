@@ -10,13 +10,8 @@
 
 package com.ge.predix.solsvc.dispatcherq.boot;
 
-import java.util.Arrays;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
@@ -35,31 +30,13 @@ import org.springframework.context.annotation.ImportResource;
 })
 public class FieldChangedEventConsumerApplication
 {
-
-    private static final Logger log = LoggerFactory.getLogger(FieldChangedEventConsumerApplication.class);
-
     /**
      * @param args - initial args
      * @throws InterruptedException -
      */
-    @SuppressWarnings("resource")
-	public static void main(String[] args)
+    public static void main(String[] args)
             throws InterruptedException
     {
-        ApplicationContext ctx = SpringApplication.run(FieldChangedEventConsumerApplication.class, args);
-
-        log.info("Let's inspect the beans provided by Spring Boot:"); //$NON-NLS-1$
-
-        String[] beanNames = ctx.getBeanDefinitionNames();
-        Arrays.sort(beanNames);
-        for (String beanName : beanNames)
-        {
-            log.info(beanName);
-        }
-
-        log.debug("Let's inspect the profiles provided by Spring Boot:"); //$NON-NLS-1$
-        String profiles[] = ctx.getEnvironment().getActiveProfiles();
-        for (int i = 0; i < profiles.length; i++)
-            log.debug("profile=" + profiles[i]); //$NON-NLS-1$
+        SpringApplication.run(FieldChangedEventConsumerApplication.class, args);
     }
 }
