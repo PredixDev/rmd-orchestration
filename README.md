@@ -4,7 +4,8 @@
 <a href="http://predixdev.github.io/rmd-orchestration" target="_blank">
 	<img height="50px" width="100px" src="images/pages.jpg" alt="view github pages">
 </a>
-##RMD Orchestration- How this works
+
+## RMD Orchestration- How this works
 - Orchestration, by design, will be listening on a specific queue for a specific TYPE of event. Queue name and the connection to the queue will be established at the deployment time.
 - Once the event is read from the queue, listener with the help of routing rules decide which orchestration to execute based on the event's message content. 
 - Predix Orchestration Runtime executes the orchestration, which in turn, can invoke one or more analytics based on the content of message.
@@ -40,14 +41,14 @@
         }
 }
 ```
-##Tech Stack
+## Tech Stack
 - Spring
 - SpringBoot
 - SpringTest
 - Maven
 - Rabbit MQ
 
-##Microcomponents
+## Microcomponents
 - [AssetBootstrap](https://github.com/predixdev/asset-bootstrap)
 - [TimeseriesBootstrap](https://github.com/predixdev/timeseries-bootstrap)
 - [PredixMicroServiceTemplates](https://github.com/PredixDev/predix-microservice-templates)
