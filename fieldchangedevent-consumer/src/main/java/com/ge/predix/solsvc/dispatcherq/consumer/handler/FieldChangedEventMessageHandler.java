@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,7 +57,7 @@ public class FieldChangedEventMessageHandler
     private static final Logger    logger = LoggerFactory.getLogger(FieldChangedEventMessageHandler.class.getName());
 
     @Autowired
-    private MessageConverter       fieldChangedEventMessageConverter;
+	private Jackson2JsonMessageConverter jacksonMessageConverter;
 
     @Autowired
     private RmdOrchestrationClient client;
@@ -107,7 +108,7 @@ public class FieldChangedEventMessageHandler
 
     private FieldChangedEvent getFieldChangedEventFromPayload(Message payload)
     {
-        FieldChangedEvent fieldChangedEvent = (FieldChangedEvent) this.fieldChangedEventMessageConverter
+        FieldChangedEvent fieldChangedEvent = (FieldChangedEvent) this.jacksonMessageConverter
                 .fromMessage(payload);
 
         logger.info("Listener received message----->" + fieldChangedEvent);

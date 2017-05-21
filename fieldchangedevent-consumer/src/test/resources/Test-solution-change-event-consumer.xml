@@ -26,28 +26,19 @@
 	<bean id="orchestrationConfig"
 		class="com.ge.predix.solsvc.dispatcherq.config.OrchestrationRestConfig" />
 
-	<oxm:jaxb2-marshaller id="fieldChangedEventmarshaller">
-		<oxm:class-to-be-bound
-			name="com.ge.predix.event.fieldchanged.FieldChangedEvent" />
-		<oxm:class-to-be-bound
-			name="com.ge.predix.entity.fieldchanged.FieldChangedList" />
-	</oxm:jaxb2-marshaller>
-
-	<bean id="fieldChangedEventMessageConverter"
-		class="org.springframework.amqp.support.converter.MarshallingMessageConverter">
-		<constructor-arg index="0" ref="fieldChangedEventmarshaller" />
-	</bean>
-
 	<bean id="fieldChangedEventMessageHandler"
 		class="com.ge.predix.solsvc.dispatcherq.consumer.handler.FieldChangedEventMessageHandler" />
 
+	<bean id="jacksonMessageConverter"
+		class="org.springframework.amqp.support.converter.Jackson2JsonMessageConverter" />
+		
 	<rabbit:connection-factory id="fieldChangedEventConnectionFactory"
 		addresses="${rabbitMQ.host}:${rabbitMQ.port}" />
 	<rabbit:admin connection-factory="fieldChangedEventConnectionFactory" />
 
 	<rabbit:template id="fieldChangedEventTemplate"
 		connection-factory="fieldChangedEventConnectionFactory"
-		message-converter="fieldChangedEventMessageConverter" />
+		message-converter="jacksonMessageConverter" />
 
 	<rabbit:queue name="mainq" />
 	<rabbit:queue name="errorq" />

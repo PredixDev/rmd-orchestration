@@ -32,6 +32,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -82,7 +83,7 @@ public class OrchestrationConsumerIT
     private FieldChangedEventMessageHandler fieldChangedEventMessageHandler;
 
     @Autowired
-    private MessageConverter                messageConverter;
+	private Jackson2JsonMessageConverter jacksonMessageConverter;
 
     @Autowired
     private ModelFactory                    modelFactory;
@@ -158,7 +159,7 @@ public class OrchestrationConsumerIT
         Integer actualDatapoint = new Integer(29);
         createDatapoint(actualDatapoint);
 
-        Message msg = this.messageConverter.toMessage(createFieldChangedEvent(), null);
+        Message msg = this.jacksonMessageConverter.toMessage(createFieldChangedEvent(), null);
 
         List<String> results = this.fieldChangedEventMessageHandler.onMessageDoWork(msg);
 
