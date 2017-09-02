@@ -1,0 +1,27 @@
+curl 
+'https://pivotal-rabbitmq-36.system.aws-usw02-pr.ice.predix.io/api/exchanges/c5180b83-8fe9-417e-9db2-b1292b10aabb/amq.default/publish' 
+-H 'Cookie: ajs_anonymous_id=%2267a45426-07a2-4af7-9794-f6ea2c9793cd%22; km_ai=8yS8T6SB%2BHiv2rpw3oD3qlV8Dq8%3D; km_lv=1487271468; mp_434c261b38016f948667232669b4dfba_mixpanel=%7B%22distinct_id%22%3A%20%2215908ea38bd1f5-0d088e1b850f0b-1d356f52-13c680-15908ea38be94f%22%2C%22%24initial_referrer%22%3A%20%22%24direct%22%2C%22%24initial_referring_domain%22%3A%20%22%24direct%22%7D; ajs_user_id=null; ajs_group_id=null; _ga=GA1.2.2067734350.1476307441; _gid=GA1.2.81214073.1501615790' 
+-H 'Origin: https://pivotal-rabbitmq-36.system.aws-usw02-pr.ice.predix.io' 
+-H 'Accept-Encoding: gzip, deflate, br' 
+-H 'Accept-Language: en-US,en;q=0.8' 
+-H 'authorization: Basic OGI4YjIzNWMtZGI3Ni00MmI3LWI4YjQtY2I0ZTJmYWQwZDY0OmNndG9zNHFhY2o0OWQwa3FjaTgwOTM1bjRq' 
+-H 'Content-Type: text/plain;charset=UTF-8' 
+-H 'Accept: */*' 
+-H 'x-vhost: ' 
+-H 'Referer: https://pivotal-rabbitmq-36.system.aws-usw02-pr.ice.predix.io/' 
+-H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36' 
+-H 'Connection: keep-alive' 
+
+--data-binary 
+'
+{
+"vhost":"c5180b83-8fe9-417e-9db2-b1292b10aabb",
+"name":"amq.default",
+"properties":{"delivery_mode":1,"headers":{},"content_type":"application/json"},
+"routing_key":"FieldChangedEventMainQueue","delivery_mode":"1",
+"payload":"{\r\n\t\"fieldChangedList\": {\r\n\t\t\"fieldChanged\": [{\r\n\t\t\t\"assetList\": {\r\n\t\t\t\t\"asset\": [{\r\n\t\t\t\t\t\"uri\": \"/asset/compressor-2017\",\r\n\t\t\t\t\t\"assetType\": \"asset\",\r\n\t\t\t\t\t\"fieldList\": {\r\n\t\t\t\t\t\t\"field\": [{\r\n\t\t\t\t\t\t\t\"fieldKey\": \"/asset/assetTag/crank-frame-dischargepressure\",\r\n\t\t\t\t\t\t\t\"fieldValue\": \"\",\r\n\t\t\t\t\t\t\t\"fieldType\": \"assetTag\",\r\n\t\t\t\t\t\t\t\"timeChanged\": \"2012-09-11T07:16:13.000Z\"\r\n\t\t\t\t\t\t}]\r\n\t\t\t\t\t}\r\n\t\t\t\t}]\r\n\t\t\t},\r\n\t\t\t\"externalAttributeMap\": {\r\n\t\t\t\t\"entry\": [{\r\n\t\t\t\t\t\"key\": \"\",\r\n\t\t\t\t\t\"value\": \"\"\r\n\t\t\t\t}]\r\n\t\t\t}\r\n\t\t}]\r\n\t}\r\n}",
+"headers":{},
+"props":{"content_type":"application/json"},
+"payload_encoding":"string"}' 
+
+--compressed
