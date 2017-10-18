@@ -31,3 +31,5 @@ How to build this project
 	3) To run integration tests
 
 		mvn clean install -P testharness  -Dserver=<rabbitmqhost> -Dport=<rabbitmq port>
+
+[![Analytics](https://ga-beacon.appspot.com/UA-82773213-1/fieldchangedevent-producer/readme?pixel)](https://github.com/PredixDev)

@@ -31,3 +31,5 @@ Steps to run this project
 5) To run integration tests
 	
 	mvn clean install -P testharness    
+
+[![Analytics](https://ga-beacon.appspot.com/UA-82773213-1/fieldchangedevent-consumer/readme?pixel)](https://github.com/PredixDev)
