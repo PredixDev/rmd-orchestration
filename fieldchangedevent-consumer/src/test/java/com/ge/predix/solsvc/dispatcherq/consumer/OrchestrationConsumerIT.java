@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -46,11 +47,13 @@ import com.ge.predix.event.fieldchanged.FieldChangedEvent;
 import com.ge.predix.solsvc.bootstrap.ams.common.AssetConfig;
 import com.ge.predix.solsvc.bootstrap.ams.dto.Attribute;
 import com.ge.predix.solsvc.bootstrap.ams.factories.ModelFactory;
+import com.ge.predix.solsvc.bootstrap.ams.factories.ModelFactoryImpl;
 import com.ge.predix.solsvc.dispatcherq.boot.FieldChangedEventConsumerApplication;
 import com.ge.predix.solsvc.dispatcherq.consumer.handler.FieldChangedEventMessageHandler;
 import com.ge.predix.solsvc.ext.util.JsonMapper;
 import com.ge.predix.solsvc.restclient.impl.RestClient;
 import com.ge.predix.solsvc.timeseries.bootstrap.client.TimeseriesClient;
+import com.ge.predix.solsvc.bootstrap.ams.factories.ModelFactoryImpl;
 
 /**
  * 
@@ -77,9 +80,11 @@ public class OrchestrationConsumerIT {
 
 	@Autowired
 	private Jackson2JsonMessageConverter jacksonMessageConverter;
-
+	
+	//@author 212672942. Making changes with adding Qualifier since now all Factory classes extend ModelFactory
 	@Autowired
-	private ModelFactory modelFactory;
+	@Qualifier("ModelFactory")
+	private ModelFactoryImpl modelFactory;
 
 	@Autowired
 	private RestClient restClient;

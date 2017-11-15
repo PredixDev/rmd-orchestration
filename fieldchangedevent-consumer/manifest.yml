@@ -2,7 +2,7 @@ applications:
   - name: {your-name}-fieldchangedevent-consumer
     buildpack: java_buildpack
     memory: 512M
-    path: target/fieldchangedevent-consumer-2.0.21.jar
+    path: target/fieldchangedevent-consumer-2.0.22.jar
     i : 1
     services:
         - {rabbitMQService}
