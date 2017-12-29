@@ -5,14 +5,14 @@
 
 	<groupId>com.ge.predix.solsvc</groupId>
 	<artifactId>fieldchangedevent-consumer</artifactId>
-	<version>2.0.22</version>
+	<version>2.0.24</version>
 
 	<properties>
-		<ext-model.version>2.3.5</ext-model.version>
-		<ext-util.version>2.3.5</ext-util.version>
-		<predix-rest-client.version>2.3.5</predix-rest-client.version>
-		<asset-bootstrap-client.version>2.0.30</asset-bootstrap-client.version>
-		<timeseries-bootstrap.version>2.1.30</timeseries-bootstrap.version>
+		<ext-model.version>2.3.7</ext-model.version>
+		<ext-util.version>2.3.7</ext-util.version>
+		<predix-rest-client.version>2.3.7</predix-rest-client.version>
+		<asset-bootstrap-client.version>2.0.33</asset-bootstrap-client.version>
+		<timeseries-bootstrap.version>2.1.32</timeseries-bootstrap.version>
 
 		<spring.version>4.1.6.RELEASE</spring.version>
 		<cxf.version>3.1.7</cxf.version>
@@ -87,18 +87,14 @@
 		</dependency>
 
 		<!-- test dependencies -->
-		<dependency>
-			<groupId>com.ge.predix.solsvc</groupId>
-			<artifactId>asset-bootstrap-client</artifactId>
-			<version>${asset-bootstrap-client.version}</version>
-			<scope>test</scope>
-		</dependency>
+		
 		<dependency>
 			<groupId>com.ge.predix.solsvc</groupId>
 			<artifactId>timeseries-bootstrap</artifactId>
 			<version>${timeseries-bootstrap.version}</version>
 			<scope>test</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.ge.predix.solsvc</groupId>
 			<artifactId>asset-bootstrap-client</artifactId>

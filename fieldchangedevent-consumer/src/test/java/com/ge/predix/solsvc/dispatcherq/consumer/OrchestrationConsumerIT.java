@@ -46,14 +46,12 @@ import com.ge.predix.entity.util.map.Map;
 import com.ge.predix.event.fieldchanged.FieldChangedEvent;
 import com.ge.predix.solsvc.bootstrap.ams.common.AssetConfig;
 import com.ge.predix.solsvc.bootstrap.ams.dto.Attribute;
-import com.ge.predix.solsvc.bootstrap.ams.factories.ModelFactory;
-import com.ge.predix.solsvc.bootstrap.ams.factories.ModelFactoryImpl;
 import com.ge.predix.solsvc.dispatcherq.boot.FieldChangedEventConsumerApplication;
 import com.ge.predix.solsvc.dispatcherq.consumer.handler.FieldChangedEventMessageHandler;
 import com.ge.predix.solsvc.ext.util.JsonMapper;
 import com.ge.predix.solsvc.restclient.impl.RestClient;
 import com.ge.predix.solsvc.timeseries.bootstrap.client.TimeseriesClient;
-import com.ge.predix.solsvc.bootstrap.ams.factories.ModelFactoryImpl;
+import com.ge.predix.solsvc.bootstrap.ams.factories.AssetClientImpl;
 
 /**
  * 
@@ -83,8 +81,8 @@ public class OrchestrationConsumerIT {
 	
 	//@author 212672942. Making changes with adding Qualifier since now all Factory classes extend ModelFactory
 	@Autowired
-	@Qualifier("ModelFactory")
-	private ModelFactoryImpl modelFactory;
+	@Qualifier("AssetClient")
+	private AssetClientImpl assetClient;
 
 	@Autowired
 	private RestClient restClient;
@@ -246,7 +244,7 @@ public class OrchestrationConsumerIT {
 			Assert.assertTrue(!result.contains("errorMsg"));
 		}
 
-		List<Object> models = this.modelFactory
+		List<Object> models = this.assetClient
 				.getModels("/asset/compressor-2017.alert-status.crank-frame-discharge-pressure", "Asset", headers);
 
 		Map attributes = ((Asset) models.get(0)).getAttributes();
@@ -280,12 +278,12 @@ public class OrchestrationConsumerIT {
 
 	@SuppressWarnings("nls")
 	private void setAlertStatus(List<Header> headers, Boolean status) {
-		List<Object> models = this.modelFactory
+		List<Object> models = this.assetClient
 				.getModels("/asset/compressor-2017.alert-status.crank-frame-discharge-pressure", "Asset", headers);
 
 		((Attribute) ((Asset) models.get(0)).getAttributes().get("alertStatus")).getValue().set(0, status);
 
-		this.modelFactory.updateModel(models.get(0), "Asset", headers);
+		this.assetClient.updateModel(models.get(0), "Asset", headers);
 	}
 
 	@SuppressWarnings("nls")
