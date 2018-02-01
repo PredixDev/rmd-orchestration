@@ -78,8 +78,9 @@ public class OrchestrationConsumerIT {
 
 	@Autowired
 	private Jackson2JsonMessageConverter jacksonMessageConverter;
-	
-	//@author 212672942. Making changes with adding Qualifier since now all Factory classes extend ModelFactory
+
+	// @author 212672942. Making changes with adding Qualifier since now all
+	// Factory classes extend ModelFactory
 	@Autowired
 	@Qualifier("AssetClient")
 	private AssetClientImpl assetClient;
@@ -144,7 +145,7 @@ public class OrchestrationConsumerIT {
 
 		setAlertStatus(headers, false);
 		Integer actualDatapoint = new Integer(29);
-		createDatapoint(actualDatapoint);
+		createDatapoint("Compressor-2017:DischargePressure", actualDatapoint); //$NON-NLS-1$
 
 		Message msg = this.jacksonMessageConverter.toMessage(createFieldChangedEvent(), null);
 
@@ -177,12 +178,13 @@ public class OrchestrationConsumerIT {
 	}
 
 	@SuppressWarnings("nls")
-	private void createDatapoint(Integer actualValueOfSensor) {
+	private void createDatapoint(String tag, Integer actualValueOfSensor) {
 		DatapointsIngestion dpIngestion = new DatapointsIngestion();
-		dpIngestion.setMessageId(String.valueOf(System.currentTimeMillis()));
+		long currentTimeMillis = System.currentTimeMillis();
+		dpIngestion.setMessageId(String.valueOf(currentTimeMillis));
 
 		List<Object> datapoint1 = new ArrayList<Object>();
-		datapoint1.add(System.currentTimeMillis());
+		datapoint1.add(currentTimeMillis);
 		datapoint1.add(actualValueOfSensor);
 		datapoint1.add(3); // quality
 
@@ -190,7 +192,7 @@ public class OrchestrationConsumerIT {
 		datapoints.add(datapoint1);
 
 		Body body = new Body();
-		body.setName("Compressor-2017:DischargePressure");
+		body.setName(tag);
 		body.setDatapoints(datapoints);
 
 		List<Body> bodies = new ArrayList<Body>();
@@ -201,11 +203,11 @@ public class OrchestrationConsumerIT {
 		this.timeseriesClient.createTimeseriesWebsocketConnectionPool();
 		this.timeseriesClient.postDataToTimeseriesWebsocket(dpIngestion);
 
-		queryForLatestDatapoints(actualValueOfSensor);
+		queryForLatestDatapoints(tag, currentTimeMillis, actualValueOfSensor);
 	}
 
 	@SuppressWarnings("nls")
-	private void queryForLatestDatapoints(Integer actualValueOfSensor) {
+	private void queryForLatestDatapoints(String timeseriesTag, long currentTimeMillis, Integer actualValueOfSensor) {
 		boolean done = false;
 		while (!done) {
 			com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.DatapointsLatestQuery datapoints = new com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.DatapointsLatestQuery();
@@ -219,14 +221,18 @@ public class OrchestrationConsumerIT {
 			com.ge.predix.entity.timeseries.datapoints.queryresponse.DatapointsResponse response = this.timeseriesClient
 					.queryForLatestDatapoint(datapoints, this.timeseriesHeaders);
 			assertNotNull(response);
+			Long currentValuesTime = (Long) ((List<?>) response.getTags().get(0).getResults().get(0).getValues().get(0)).get(0);
+			Object currentValue = ((List<?>) response.getTags().get(0).getResults().get(0).getValues().get(0)).get(1);
 			try {
-				assertEquals(((List<?>) response.getTags().get(0).getResults().get(0).getValues().get(0)).get(1),
-						actualValueOfSensor);
+
+				assertEquals(currentValue, actualValueOfSensor);
 				done = true;
 			} catch (AssertionError e) {
 				try {
-					log.warn("timeseries value=" + actualValueOfSensor + " is not available yet, sleeping");
+					log.warn("timeseries currentValuesTime=" + currentValuesTime + " currentValue=" + currentValue + " valueTime=" + currentTimeMillis + " value=" + actualValueOfSensor
+							+ " is not available yet, sleeping");
 					Thread.sleep(3000);
+					createDatapoint(timeseriesTag, actualValueOfSensor);
 				} catch (InterruptedException e1) {
 					throw new RuntimeException(e1);
 				}
@@ -236,7 +242,8 @@ public class OrchestrationConsumerIT {
 	}
 
 	@SuppressWarnings("nls")
-	private void verifyResponse(List<Header> headers, List<String> results, boolean expectedAlertStatus, Integer expectedAlertLevelValue) {
+	private void verifyResponse(List<Header> headers, List<String> results, boolean expectedAlertStatus,
+			Integer expectedAlertLevelValue) {
 
 		log.debug("Results = " + results);
 		Assert.assertNotNull(results);
@@ -253,17 +260,20 @@ public class OrchestrationConsumerIT {
 		Attribute alertStatus = (Attribute) attributes.get("alertStatus");
 		if (alertLevelValue.getValue().get(0) instanceof Integer) {
 			Integer alertLevelValueAsInteger = (Integer) alertLevelValue.getValue().get(0);
-			if ( !alertLevelValueAsInteger.equals(expectedAlertLevelValue))
-				Assert.fail("The value the test case set, is not the value that timeseries and/or the analytic saved alertLevelValue=" + alertLevelValueAsInteger + " expectedAlertLevelValue=" + expectedAlertLevelValue);
-			
-			if ( !alertStatus.getValue().get(0).equals(expectedAlertStatus))
-				Assert.fail("The expected alertStatus=" + expectedAlertStatus + " does not match actualAlertStatus" + alertStatus.getValue().get(0));
-			
-//			if (alertLevelValueAsInteger >= 23) {
-//				Assert.assertEquals(true, alertStatus.getValue().get(0));
-//			} else {
-//				Assert.assertEquals(false, alertStatus.getValue().get(0));
-//			}
+			if (!alertLevelValueAsInteger.equals(expectedAlertLevelValue))
+				Assert.fail(
+						"The value the test case set, is not the value that timeseries and/or the analytic saved alertLevelValue="
+								+ alertLevelValueAsInteger + " expectedAlertLevelValue=" + expectedAlertLevelValue);
+
+			if (!alertStatus.getValue().get(0).equals(expectedAlertStatus))
+				Assert.fail("The expected alertStatus=" + expectedAlertStatus + " does not match actualAlertStatus"
+						+ alertStatus.getValue().get(0));
+
+			// if (alertLevelValueAsInteger >= 23) {
+			// Assert.assertEquals(true, alertStatus.getValue().get(0));
+			// } else {
+			// Assert.assertEquals(false, alertStatus.getValue().get(0));
+			// }
 		} else if (alertLevelValue.getValue().get(0) instanceof Double) {
 			Double actualValueOfSensor = (Double) alertLevelValue.getValue().get(0);
 

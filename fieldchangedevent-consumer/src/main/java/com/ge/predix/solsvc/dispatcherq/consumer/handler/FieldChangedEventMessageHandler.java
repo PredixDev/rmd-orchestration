@@ -74,7 +74,7 @@ public class FieldChangedEventMessageHandler implements MessageListener {
 			// another way is to configure a dead letter queue on the queue
 			// manager
 			String messageAsString = null;
-			if ( message != null ) 
+			if (message != null)
 				messageAsString = new String(message.getBody());
 			logger.error("Message is not processable. error=" + e.getMessage() + " message=" + messageAsString, e);
 		}
@@ -86,23 +86,25 @@ public class FieldChangedEventMessageHandler implements MessageListener {
 	 * @return -
 	 */
 	public List<String> onMessageDoWork(Message message) {
-		// Get the java object from the payload
 		String payloadAsString = new String(message.getBody());
-		logger.info("Listener received message----->" + payloadAsString);
-
-		FieldChangedEvent fce = getFieldChangedEventFromPayload(payloadAsString);
-
-		// Convert the retrieved java object to the REST service request object
-		// and Invoke the REST service
 		try {
+			// Get the java object from the payload
+			logger.info("Listener received message----->" + payloadAsString);
+
+			FieldChangedEvent fce = getFieldChangedEventFromPayload(payloadAsString);
+
+			// Convert the retrieved java object to the REST service request
+			// object
+			// and Invoke the REST service
 			return convertFCEtoRunAnalyticAndRunOrchestration(fce);
 		} catch (JsonProcessingException e) {
-			logger.error("JsonProcessingException", e);
 			throw new RuntimeException(e);
 		} catch (IOException e) {
-			logger.error("IOException", e);
 			throw new RuntimeException(e);
+		} catch (Throwable e) {
+			throw new RuntimeException("Unable to process, payloadAsString=" + payloadAsString, e);
 		}
+
 	}
 
 	private FieldChangedEvent getFieldChangedEventFromPayload(String payload) {
