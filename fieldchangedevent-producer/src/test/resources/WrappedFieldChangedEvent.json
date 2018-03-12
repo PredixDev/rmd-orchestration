@@ -3,7 +3,7 @@
 "name":"amq.default",
 "properties":{"delivery_mode":1,"headers":{},"content_type":"application/json"},
 "routing_key":"#routingkey#","delivery_mode":"1",
-"payload":"{\r\n\t\"fieldChangedList\": {\r\n\t\t\"fieldChanged\": [{\r\n\t\t\t\"assetList\": {\r\n\t\t\t\t\"asset\": [{\r\n\t\t\t\t\t\"uri\": \"/asset/compressor-2017\",\r\n\t\t\t\t\t\"assetType\": \"asset\",\r\n\t\t\t\t\t\"fieldList\": {\r\n\t\t\t\t\t\t\"field\": [{\r\n\t\t\t\t\t\t\t\"fieldKey\": \"/asset/assetTag/crank-frame-dischargepressure\",\r\n\t\t\t\t\t\t\t\"fieldValue\": \"\",\r\n\t\t\t\t\t\t\t\"fieldType\": \"assetTag\",\r\n\t\t\t\t\t\t\t\"timeChanged\": \"2012-10-11T07:16:13.000Z\"\r\n\t\t\t\t\t\t}]\r\n\t\t\t\t\t}\r\n\t\t\t\t}]\r\n\t\t\t},\r\n\t\t\t\"externalAttributeMap\": {\r\n\t\t\t\t\"entry\": [{\r\n\t\t\t\t\t\"key\": \"\",\r\n\t\t\t\t\t\"value\": \"\"\r\n\t\t\t\t}]\r\n\t\t\t}\r\n\t\t}]\r\n\t}\r\n}",
+"payload":"{\r\n\t\"fieldChangedList\": {\r\n\t\t\"fieldChanged\": [{\r\n\t\t\t\"assetList\": {\r\n\t\t\t\t\"asset\": [{\r\n\t\t\t\t\t\"uri\": \"/asset//asset/machine102\",\r\n\t\t\t\t\t\"assetType\": \"asset\",\r\n\t\t\t\t\t\"fieldList\": {\r\n\t\t\t\t\t\t\"field\": [{\r\n\t\t\t\t\t\t\t\"fieldKey\": \"/asset/assetTag/compressionratio\",\r\n\t\t\t\t\t\t\t\"fieldValue\": \"\",\r\n\t\t\t\t\t\t\t\"fieldType\": \"assetTag\",\r\n\t\t\t\t\t\t\t\"timeChanged\": \"2012-10-11T07:16:13.000Z\"\r\n\t\t\t\t\t\t}]\r\n\t\t\t\t\t}\r\n\t\t\t\t}]\r\n\t\t\t},\r\n\t\t\t\"externalAttributeMap\": {\r\n\t\t\t\t\"entry\": [{\r\n\t\t\t\t\t\"key\": \"\",\r\n\t\t\t\t\t\"value\": \"\"\r\n\t\t\t\t}]\r\n\t\t\t}\r\n\t\t}]\r\n\t}\r\n}",
 "headers":{},
 "props":{"content_type":"application/json"},
 "payload_encoding":"string"

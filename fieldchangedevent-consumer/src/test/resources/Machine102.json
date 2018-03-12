@@ -1,0 +1,100 @@
+[{
+		"complexType": "Asset",
+		"uri": "/asset/machine102",
+		"classificationUri": "/classification/GE_COMPRESSOR_CYLINDER",
+		"assetId": "machine102",
+		"description": "Machine 102",
+		"filter": "group=/group/plant-richmond-refinery",
+		"isMock": true,
+		"group": "/group/plant-richmond-refinery",
+		"assetTag": {
+			"compressionratio": {
+				"complexType": "AssetTag",
+				"label": "Compression Ratio",
+				"tagUri": "/tag/compressionratio",
+				"hiAlarmThreshold": 23,
+				"loAlarmThreshold": 0,
+				"isKpi": true,
+				"timeseriesDatasource": {
+					"complexType": "TimeseriesDatasource",
+					"tag": "Machine-102:CompressionRatio"
+				},
+				"edgeDatasource": {
+					"complexType": "EdgeDatasource",
+					"nodeName": "Machine-102:CompressionRatio",
+					"controllerUri": "/asset/Bently.Nevada.3500.Rack1"
+				},
+				"alertStatusUri": "/asset/machine102.alert-status.compressionratio"
+			}
+		}
+	},
+	{
+		"complexType": "Asset",
+		"uri": "/asset/machine102.alert-status.compressionratio",
+		"classificationUri": "/classification/alert-status",
+		"assetId": "/asset/machine102.alert-status.compressionratio",
+		"attributes": {
+			"alertStatus": {
+				"complexType": "Attribute",
+				"enumeration": [],
+				"value": [
+					"false"
+				]
+			},
+			"alertType": {
+				"complexType": "Attribute",
+				"enumeration": [],
+				"value": [
+					"Analytic"
+				]
+			},
+			"alertLevel": {
+				"complexType": "Attribute",
+				"enumeration": [],
+				"value": []
+			},
+			"alertLevelValue": {
+				"complexType": "Attribute",
+				"enumeration": [],
+				"value": []
+			},
+			"alertTime": {
+				"complexType": "Attribute",
+				"enumeration": [],
+				"value": []
+			},
+			"deltaThresholdColor": {
+				"complexType": "Attribute",
+				"enumeration": [],
+				"value": []
+			},
+			"deltaThresholdDirection": {
+				"complexType": "Attribute",
+				"enumeration": [],
+				"value": []
+			},
+			"deltaThresholdLevel": {
+				"complexType": "Attribute",
+				"enumeration": [],
+				"value": []
+			},
+			"deltaThreshold": {
+				"complexType": "Attribute",
+				"enumeration": [],
+				"value": []
+			},
+			"sourceType": {
+				"complexType": "Attribute",
+				"enumeration": [],
+				"value": [
+					"PredixTimeseries"
+				]
+			},
+			"fieldSourceUri": {
+				"complexType": "Attribute",
+				"enumeration": [],
+				"value": []
+			}
+		}
+	}
+]

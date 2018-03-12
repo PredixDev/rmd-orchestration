@@ -97,7 +97,8 @@ public class OrchestrationConsumerIT {
 	@Autowired
 	private TimeseriesClient timeseriesClient;
 
-	private List<Header> timeseriesHeaders;
+	private List<Header>           assetHeaders;
+	private String	timeseriesTag;
 
 	/**
 	 * @throws java.lang.Exception
@@ -123,8 +124,8 @@ public class OrchestrationConsumerIT {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		// setUp
-	}
+        this.assetHeaders = setHeaders();
+        this.timeseriesTag = "Machine-102:CompressionRatio";	}
 
 	/**
 	 * @throws java.lang.Exception
@@ -139,19 +140,18 @@ public class OrchestrationConsumerIT {
 	 * -
 	 */
 	@Test
-	public void testFieldChangedAndAlarmAccordingly() {
-
-		List<Header> headers = setHeaders();
-
-		setAlertStatus(headers, false);
+	public void testAlarm() {
+		createAsset();
+    	sleep();
+		setAlertStatus(this.assetHeaders, false);
 		Integer actualDatapoint = new Integer(29);
-		createDatapoint("Compressor-2017:DischargePressure", actualDatapoint); //$NON-NLS-1$
+		createDatapoint(this.timeseriesTag, actualDatapoint); //$NON-NLS-1$
 
 		Message msg = this.jacksonMessageConverter.toMessage(createFieldChangedEvent(), null);
 
 		List<String> results = this.fieldChangedEventMessageHandler.onMessageDoWork(msg);
 
-		verifyResponse(headers, results, true, actualDatapoint);
+		verifyResponse(this.assetHeaders, results, true, actualDatapoint);
 	}
 
 	/**
@@ -180,7 +180,7 @@ public class OrchestrationConsumerIT {
 	@SuppressWarnings("nls")
 	private void createDatapoint(String tag, Integer actualValueOfSensor) {
 		DatapointsIngestion dpIngestion = new DatapointsIngestion();
-		long currentTimeMillis = System.currentTimeMillis();
+		long currentTimeMillis = System.currentTimeMillis() + 1000000;
 		dpIngestion.setMessageId(String.valueOf(currentTimeMillis));
 
 		List<Object> datapoint1 = new ArrayList<Object>();
@@ -202,43 +202,6 @@ public class OrchestrationConsumerIT {
 
 		this.timeseriesClient.createTimeseriesWebsocketConnectionPool();
 		this.timeseriesClient.postDataToTimeseriesWebsocket(dpIngestion);
-
-		queryForLatestDatapoints(tag, currentTimeMillis, actualValueOfSensor);
-	}
-
-	@SuppressWarnings("nls")
-	private void queryForLatestDatapoints(String timeseriesTag, long currentTimeMillis, Integer actualValueOfSensor) {
-		boolean done = false;
-		while (!done) {
-			com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.DatapointsLatestQuery datapoints = new com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.DatapointsLatestQuery();
-			com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.Tag tag = new com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.Tag();
-			tag.setName("Compressor-2017:DischargePressure"); //$NON-NLS-1$
-
-			List<com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.Tag> tagList = new ArrayList<com.ge.predix.entity.timeseries.datapoints.queryrequest.latest.Tag>();
-			tagList.add(tag);
-			datapoints.setTags(tagList);
-			this.timeseriesHeaders = this.timeseriesClient.getTimeseriesHeaders();
-			com.ge.predix.entity.timeseries.datapoints.queryresponse.DatapointsResponse response = this.timeseriesClient
-					.queryForLatestDatapoint(datapoints, this.timeseriesHeaders);
-			assertNotNull(response);
-			Long currentValuesTime = (Long) ((List<?>) response.getTags().get(0).getResults().get(0).getValues().get(0)).get(0);
-			Object currentValue = ((List<?>) response.getTags().get(0).getResults().get(0).getValues().get(0)).get(1);
-			try {
-
-				assertEquals(currentValue, actualValueOfSensor);
-				done = true;
-			} catch (AssertionError e) {
-				try {
-					log.warn("timeseries currentValuesTime=" + currentValuesTime + " currentValue=" + currentValue + " valueTime=" + currentTimeMillis + " value=" + actualValueOfSensor
-							+ " is not available yet, sleeping");
-					Thread.sleep(3000);
-					createDatapoint(timeseriesTag, actualValueOfSensor);
-				} catch (InterruptedException e1) {
-					throw new RuntimeException(e1);
-				}
-			}
-
-		}
 	}
 
 	@SuppressWarnings("nls")
@@ -252,7 +215,7 @@ public class OrchestrationConsumerIT {
 		}
 
 		List<Object> models = this.assetClient
-				.getModels("/asset/compressor-2017.alert-status.crank-frame-discharge-pressure", "Asset", headers);
+				.getModels("/asset/machine102.alert-status.compressionratio", "Asset", headers);
 
 		Map attributes = ((Asset) models.get(0)).getAttributes();
 		log.debug(attributes.keySet().toString());
@@ -268,12 +231,6 @@ public class OrchestrationConsumerIT {
 			if (!alertStatus.getValue().get(0).equals(expectedAlertStatus))
 				Assert.fail("The expected alertStatus=" + expectedAlertStatus + " does not match actualAlertStatus"
 						+ alertStatus.getValue().get(0));
-
-			// if (alertLevelValueAsInteger >= 23) {
-			// Assert.assertEquals(true, alertStatus.getValue().get(0));
-			// } else {
-			// Assert.assertEquals(false, alertStatus.getValue().get(0));
-			// }
 		} else if (alertLevelValue.getValue().get(0) instanceof Double) {
 			Double actualValueOfSensor = (Double) alertLevelValue.getValue().get(0);
 
@@ -289,7 +246,7 @@ public class OrchestrationConsumerIT {
 	@SuppressWarnings("nls")
 	private void setAlertStatus(List<Header> headers, Boolean status) {
 		List<Object> models = this.assetClient
-				.getModels("/asset/compressor-2017.alert-status.crank-frame-discharge-pressure", "Asset", headers);
+				.getModels("/asset/machine102.alert-status.compressionratio", "Asset", headers);
 
 		((Attribute) ((Asset) models.get(0)).getAttributes().get("alertStatus")).getValue().set(0, status);
 
@@ -326,5 +283,38 @@ public class OrchestrationConsumerIT {
 
 		return fieldChangedEvent;
 	}
+
+    private void sleep()
+    {
+        try
+        {
+            Thread.currentThread();
+            Thread.sleep(10000);
+        }
+        catch (InterruptedException e)
+        {
+            log.error(e.getMessage(), e);
+        }
+    }
+    
+    @SuppressWarnings("nls")
+    private String readAssetInfoFromFile()
+    {
+        try
+        {
+            return IOUtils.toString(
+                    getClass().getClassLoader().getResourceAsStream("Machine102.json"));
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    @SuppressWarnings("nls")
+    private void createAsset()
+    {
+    	this.assetClient.createFromJson("/asset", readAssetInfoFromFile(), this.assetHeaders);
+    }
 
 }

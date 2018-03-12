@@ -3,11 +3,11 @@
 		"fieldChanged": [{
 			"assetList": {
 				"asset": [{
-					"uri": "/asset/compressor-2017",
+					"uri": "/asset/machine102",
 					"assetType": "asset",
 					"fieldList": {
 						"field": [{
-							"fieldKey": "/asset/assetTag/crank-frame-dischargepressure",
+							"fieldKey": "/asset/assetTag/compressionratio",
 							"fieldValue": "",
 							"fieldType": "assetTag",
 							"timeChanged": "2012-09-11T07:16:13.000Z"
@@ -25,11 +25,11 @@
 		{
 			"assetList": {
 				"asset": [{
-					"uri": "/asset/compressor-2017",
+					"uri": "/asset/machine102",
 					"assetType": "asset",
 					"fieldList": {
 						"field": [{
-							"fieldKey": "/asset/assetTag/crank-frame-dischargepressure",
+							"fieldKey": "/asset/assetTag/compressionratio",
 							"fieldValue": "",
 							"fieldType": "assetTag",
 							"timeChanged": "2012-09-11T07:16:13.000Z"
