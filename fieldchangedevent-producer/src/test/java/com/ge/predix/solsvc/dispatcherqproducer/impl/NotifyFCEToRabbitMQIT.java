@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.ge.predix.event.fieldchanged.FieldChangedEvent;
 import com.ge.predix.solsvc.restclient.impl.RestClient;
 
 /**
@@ -92,15 +91,17 @@ public class NotifyFCEToRabbitMQIT {
 	/**
 	 * -
 	 */
+	@SuppressWarnings("nls")
 	@Test
 	public void testNotifyFieldChangedEvent() {
-		log.debug("Host = " + rabbitMQServerUrl);
+		log.debug("Host = " + this.rabbitMQServerUrl);
 				
 		List<Header> headers = new ArrayList<Header>();
 		headers.add(new BasicHeader("Content-Type", "text/plain;charset=UTF-8"));
-		headers.add(new BasicHeader("Authorization", "Basic " + rabbitMQAuthcode));
+		headers.add(new BasicHeader("Authorization", "Basic " + this.rabbitMQAuthcode));
 
-		CloseableHttpResponse response = this.restClient.post(rabbitMQServerUrl, createFieldChangedEvent(), headers);	
+		@SuppressWarnings("resource")
+		CloseableHttpResponse response = this.restClient.post(this.rabbitMQServerUrl, createFieldChangedEvent(), headers);	
 		
         log.debug("RESPONSE: Response from RabbitMQ post message  = " + response);
 
@@ -115,6 +116,7 @@ public class NotifyFCEToRabbitMQIT {
         Assert.assertTrue(responseAsString.contains("true"));
 	}
 
+	@SuppressWarnings("nls")
 	private String createFieldChangedEvent() {
 		String fieldChangedEventStr = null;
 		String tempStr = null;
@@ -124,8 +126,8 @@ public class NotifyFCEToRabbitMQIT {
 					.getClassLoader().getResourceAsStream(
 							"WrappedFieldChangedEvent.json"));
 			
-			tempStr = fieldChangedEventStr.replaceFirst("#exchange#", rabbitMQExchange);
-			fieldChangedEventStr = tempStr.replaceFirst("#routingkey#", rabbitMQRoutingKey);
+			tempStr = fieldChangedEventStr.replaceFirst("#exchange#", this.rabbitMQExchange);
+			fieldChangedEventStr = tempStr.replaceFirst("#routingkey#", this.rabbitMQRoutingKey);
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

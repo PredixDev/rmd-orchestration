@@ -36,6 +36,7 @@ import com.ge.predix.solsvc.ext.util.JsonMapper;
 @ContextConfiguration(locations = { "classpath:META-INF/spring/field-change-event-producer.xml",
 		"classpath*:META-INF/spring/ext-util-scan-context.xml" })
 public class NotifyFCEToRabbitMQTestHarness {
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(NotifyFieldChangedEventToRabbitMQueue.class.getName());
 
 	@Autowired

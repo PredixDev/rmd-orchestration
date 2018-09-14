@@ -10,9 +10,6 @@
 
 package com.ge.predix.solsvc.dispatcherq.consumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,14 +41,12 @@ import com.ge.predix.entity.timeseries.datapoints.ingestionrequest.Body;
 import com.ge.predix.entity.timeseries.datapoints.ingestionrequest.DatapointsIngestion;
 import com.ge.predix.entity.util.map.Map;
 import com.ge.predix.event.fieldchanged.FieldChangedEvent;
-import com.ge.predix.solsvc.bootstrap.ams.common.AssetConfig;
+import com.ge.predix.solsvc.bootstrap.ams.client.AssetClientImpl;
 import com.ge.predix.solsvc.bootstrap.ams.dto.Attribute;
 import com.ge.predix.solsvc.dispatcherq.boot.FieldChangedEventConsumerApplication;
 import com.ge.predix.solsvc.dispatcherq.consumer.handler.FieldChangedEventMessageHandler;
 import com.ge.predix.solsvc.ext.util.JsonMapper;
-import com.ge.predix.solsvc.restclient.impl.RestClient;
 import com.ge.predix.solsvc.timeseries.bootstrap.client.TimeseriesClient;
-import com.ge.predix.solsvc.bootstrap.ams.factories.AssetClientImpl;
 
 /**
  * 
@@ -61,9 +56,7 @@ import com.ge.predix.solsvc.bootstrap.ams.factories.AssetClientImpl;
 @SpringApplicationConfiguration(classes = { FieldChangedEventConsumerApplication.class })
 @ContextConfiguration(locations = { "classpath*:META-INF/spring/ext-util-scan-context.xml",
 		"classpath*:META-INF/spring/asset-bootstrap-client-scan-context.xml",
-		"classpath*:META-INF/spring/predix-websocket-client-scan-context.xml",
 		"classpath*:META-INF/spring/timeseries-bootstrap-scan-context.xml",
-		"classpath*:META-INF/spring/predix-rest-client-scan-context.xml",
 		"classpath*:META-INF/spring/predix-rest-client-sb-properties-context.xml",
 		"classpath*:Test-solution-change-event-consumer.xml" })
 public class OrchestrationConsumerIT {
@@ -85,11 +78,6 @@ public class OrchestrationConsumerIT {
 	@Qualifier("AssetClient")
 	private AssetClientImpl assetClient;
 
-	@Autowired
-	private RestClient restClient;
-
-	@Autowired
-	private AssetConfig assetConfig;
 
 	@Autowired
 	private JsonMapper jsonMapper;
@@ -122,6 +110,7 @@ public class OrchestrationConsumerIT {
 	 * @throws java.lang.Exception
 	 *             -
 	 */
+	@SuppressWarnings("nls")
 	@Before
 	public void setUp() throws Exception {
         this.assetHeaders = setHeaders();
@@ -145,7 +134,7 @@ public class OrchestrationConsumerIT {
     	sleep();
 		setAlertStatus(this.assetHeaders, false);
 		Integer actualDatapoint = new Integer(29);
-		createDatapoint(this.timeseriesTag, actualDatapoint); //$NON-NLS-1$
+		createDatapoint(this.timeseriesTag, actualDatapoint); 
 
 		Message msg = this.jacksonMessageConverter.toMessage(createFieldChangedEvent(), null);
 
@@ -177,7 +166,6 @@ public class OrchestrationConsumerIT {
 
 	}
 
-	@SuppressWarnings("nls")
 	private void createDatapoint(String tag, Integer actualValueOfSensor) {
 		DatapointsIngestion dpIngestion = new DatapointsIngestion();
 		long currentTimeMillis = System.currentTimeMillis() + 1000000;
@@ -254,10 +242,9 @@ public class OrchestrationConsumerIT {
 	}
 
 	@SuppressWarnings("nls")
-	private List<Header> setHeaders() {
+    private List<Header> setHeaders() {
 
-		List<Header> headers = this.restClient.getSecureTokenForClientId();
-		this.restClient.addZoneToHeaders(headers, this.assetConfig.getZoneId());
+		List<Header> headers = this.assetClient.getAssetHeaders();
 
 		Header header = new BasicHeader("Content-Type", "application/json");
 		headers.add(header);

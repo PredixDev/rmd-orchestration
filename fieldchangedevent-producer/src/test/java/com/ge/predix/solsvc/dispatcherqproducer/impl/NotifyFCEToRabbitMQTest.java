@@ -13,10 +13,8 @@ package com.ge.predix.solsvc.dispatcherqproducer.impl;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 
-import org.apache.cxf.helpers.IOUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -28,10 +26,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ge.predix.event.fieldchanged.FieldChangedEvent;
-import com.ge.predix.solsvc.ext.util.JsonMapper;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -50,9 +46,6 @@ public class NotifyFCEToRabbitMQTest {
 	
 	@Mock
 	private MessageConverter messageConverter;
-	
-	@Autowired
-	private JsonMapper jsonMapper;
 	
 	/**
 	 * @throws java.lang.Exception
