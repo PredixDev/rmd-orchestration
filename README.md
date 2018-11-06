@@ -19,7 +19,7 @@
                 "fieldChanged": [{
                         "assetList": {
                                 "asset": [{
-                                        "uri": "/asset/compressor-2017",
+                                        "uri": "/asset/Compressor-CMMS-Compressor-2018",
                                         "assetType": "asset",
                                         "fieldList": {
                                                 "field": [{
