@@ -58,4 +58,4 @@
 * [More GE resources](http://github.com/predixdev/predix-rmd-ref-app/docs/resources.md)
 * [RMD Reference App](http://github.com/predixdev/predix-rmd-ref-app)
 
-[![Analytics](https://ga-beacon.appspot.com/UA-82773213-1/rmd-orchestration/readme?pixel)](https://github.com/PredixDev)
+[![Analytics](https://predix-beacon.appspot.com/UA-82773213-1/rmd-orchestration/readme?pixel)](https://github.com/PredixDev)
